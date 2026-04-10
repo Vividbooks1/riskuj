@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Matematické riskuj — výběr tématu</title>
+  <style>
+    :root {
+      --bg: #2d3a2e;
+      --bg-card: #384839;
+      --bg-elevated: #435544;
+      --border: rgba(245, 250, 235, 0.14);
+      --text: #f0f4e8;
+      --muted: #b4c4a8;
+      --accent: #d4e8b8;
+      --accent-soft: rgba(212, 232, 184, 0.12);
+      --gold: #f0de90;
+      --radius: 14px;
+      --shadow: 0 14px 36px rgba(0, 0, 0, 0.35);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      background: var(--bg);
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      background-image:
+        radial-gradient(ellipse 85% 55% at 50% -10%, rgba(255, 255, 255, 0.06), transparent),
+        radial-gradient(ellipse 45% 35% at 100% 100%, rgba(0, 0, 0, 0.15), transparent);
+    }
+
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem 1.25rem 3rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    header h1 {
+      margin: 0 0 0.5rem;
+      font-size: clamp(1.6rem, 4vw, 2.15rem);
+      font-weight: 700;
+      color: var(--text);
+      text-shadow: 0 2px 0 rgba(0, 0, 0, 0.25);
+    }
+
+    header p {
+      margin: 0;
+      font-size: 1.05rem;
+      color: var(--muted);
+      max-width: 36rem;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.5;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1rem;
+    }
+
+    a.card {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.45rem;
+      padding: 1.2rem 1.15rem 1.1rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      text-decoration: none;
+      color: inherit;
+      transition: transform 0.15s ease, border-color 0.15s, box-shadow 0.15s;
+      min-height: 100%;
+    }
+
+    a.card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(240, 222, 144, 0.45);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    a.card:focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 3px;
+    }
+
+    .card-grade {
+      font-size: 0.78rem;
+      color: var(--muted);
+      font-weight: 650;
+      margin-top: -0.15rem;
+    }
+
+    .card h2 {
+      margin: 0;
+      font-size: 1.12rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.25;
+    }
+
+    .card .desc {
+      margin: 0;
+      font-size: 0.88rem;
+      line-height: 1.4;
+      color: var(--muted);
+      flex: 1;
+    }
+
+    .card .go {
+      margin-top: 0.25rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .menu-err {
+      padding: 1rem;
+      border-radius: var(--radius);
+      background: rgba(240, 168, 168, 0.12);
+      border: 1px solid rgba(240, 168, 168, 0.35);
+      color: #fecaca;
+      margin-bottom: 1.25rem;
+    }
+
+    footer {
+      margin-top: 2.5rem;
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .guide-actions {
+      margin: 1.25rem 0 0;
+    }
+
+    .btn-guide {
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 0.55rem 1.1rem;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--bg-elevated);
+      color: var(--accent);
+      cursor: pointer;
+      transition: filter 0.15s, border-color 0.15s;
+    }
+
+    .btn-guide:hover {
+      filter: brightness(1.08);
+      border-color: rgba(240, 222, 144, 0.45);
+    }
+
+    .btn-guide:focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 3px;
+    }
+
+    .btn-reset {
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 700;
+      padding: 0.55rem 1.1rem;
+      border-radius: 10px;
+      border: 1px solid rgba(240, 168, 168, 0.45);
+      background: rgba(240, 168, 168, 0.16);
+      color: #fecaca;
+      cursor: pointer;
+      transition: filter 0.15s, border-color 0.15s;
+      margin-left: 0.5rem;
+    }
+
+    .btn-reset:hover {
+      filter: brightness(1.08);
+      border-color: rgba(240, 168, 168, 0.65);
+    }
+
+    .btn-reset:focus-visible {
+      outline: 2px solid rgba(240, 168, 168, 0.85);
+      outline-offset: 3px;
+    }
+
+    .data-note {
+      margin: 0.75rem auto 0;
+      max-width: 36rem;
+      font-size: 0.92rem;
+      line-height: 1.45;
+      color: var(--accent);
+      background: var(--accent-soft);
+      border: 1px solid rgba(212, 232, 184, 0.28);
+      border-radius: var(--radius);
+      padding: 0.65rem 0.85rem;
+      display: none;
+    }
+
+    .guide-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 1.25rem;
+      padding-top: max(1.25rem, env(safe-area-inset-top));
+      background: rgba(0, 0, 0, 0.55);
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .guide-backdrop[hidden] {
+      display: none;
+    }
+
+    .guide-modal {
+      width: min(100%, 40rem);
+      max-height: min(88vh, 900px);
+      margin: auto 0;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .guide-modal__head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 1rem 1.1rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-elevated);
+      flex-shrink: 0;
+    }
+
+    .guide-modal__head h2 {
+      margin: 0;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.3;
+    }
+
+    .btn-guide-close {
+      flex-shrink: 0;
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 0.4rem 0.75rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    .btn-guide-close:hover {
+      color: var(--text);
+    }
+
+    .guide-modal__body {
+      padding: 1rem 1.15rem 1.25rem;
+      overflow-y: auto;
+      font-size: 0.92rem;
+      line-height: 1.55;
+      color: var(--text);
+    }
+
+    .guide-modal__body > section {
+      margin-bottom: 1.35rem;
+    }
+
+    .guide-modal__body > section:last-child {
+      margin-bottom: 0;
+    }
+
+    .guide-modal__body h3 {
+      margin: 0 0 0.5rem;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--gold);
+      font-weight: 700;
+    }
+
+    .guide-modal__body p {
+      margin: 0 0 0.65rem;
+      color: var(--muted);
+    }
+
+    .guide-modal__body p:last-child {
+      margin-bottom: 0;
+    }
+
+    .guide-modal__body .guide-sub {
+      font-weight: 600;
+      color: var(--text);
+      margin-top: 0.75rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .guide-modal__body .guide-sub:first-child {
+      margin-top: 0;
+    }
+  </style>
+</head>
+<body style="background-color: #2d3a2e; color: #f0f4e8">
+  <div class="wrap">
+    <header>
+      <h1 style="color: #f0f4e8">Matematické riskuj</h1>
+      <p class="guide-actions">
+        <button type="button" class="btn-guide" id="btnGuide" aria-haspopup="dialog">
+          Návod na hru Riskuj
+        </button>
+        <button type="button" class="btn-reset" id="btnResetData" hidden>
+          Obnovit původní data
+        </button>
+      </p>
+      <p class="data-note" id="dataNote"></p>
+    </header>
+
+    <div
+      id="guideBackdrop"
+      class="guide-backdrop"
+      hidden
+      role="presentation"
+      aria-hidden="true"
+    >
+      <div
+        class="guide-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="guideTitle"
+        id="guideDialog"
+      >
+        <div class="guide-modal__head">
+          <h2 id="guideTitle">Návod na hru Riskuj</h2>
+          <button type="button" class="btn-guide-close" id="btnGuideClose">Zavřít</button>
+        </div>
+        <div class="guide-modal__body">
+          <p style="color: var(--text)">
+            Riskuj je týmová hra určená k opakování a procvičování již probraného učiva.
+          </p>
+          <section>
+            <h3>Úvodní informace</h3>
+            <p>Hra je určena pro libovolný počet týmů (minimálně 2).</p>
+            <p>Počet hráčů v týmu není omezen (doporučeno je přibližně 5–7 hráčů).</p>
+            <p>
+              Členové jednoho týmu sedí pohromadě, aby mohli spolupracovat při řešení úloh. Každý tým má
+              navíc vyhrazené oddělené místo pro jednoho „samostatného řešitele“.
+            </p>
+          </section>
+          <section>
+            <h3>Průběh hry</h3>
+            <p>Hra probíhá v kolech, jejichž počet není omezen.</p>
+            <p class="guide-sub">Výběr řešitele</p>
+            <p>Na začátku každého kola si každý tým zvolí jednoho samostatného řešitele. Ten odchází na oddělené místo. Každý hráč musí být vybrán alespoň jednou, než může být vybrán znovu.</p>
+            <p class="guide-sub">Volba úlohy</p>
+            <p>Jeden z vybraných řešitelů zvolí téma a obtížnost úlohy.</p>
+            <p class="guide-sub">Řešení úlohy</p>
+            <p>Moderátor zobrazí zadání.</p>
+            <p>Všichni hráči řeší zadanou úlohu.</p>
+            <p>Hráči sedící spolu v rámci jednoho týmu mohou spolupracovat. Samostatní řešitelé pracují bez pomoci.</p>
+            <p class="guide-sub">Vyhodnocení řešitelů</p>
+            <p>Moderátor zkontroluje odpovědi samostatných řešitelů. Tým, jehož řešitel odpověděl správně, získává plný počet bodů.</p>
+            <p class="guide-sub">Šance pro tým</p>
+            <p>Pokud samostatný řešitel odpověděl špatně:</p>
+            <p>Zbytek týmu se může poradit a odpověď opravit.</p>
+            <p>Pokud odpoví správně → získají 0 bodů.</p>
+            <p>Pokud odpoví špatně → odečte se jim polovina bodové hodnoty otázky.</p>
+            <p class="guide-sub">Konec kola</p>
+            <p>Kolo končí a začíná nové výběrem dalších řešitelů a nové otázky.</p>
+          </section>
+          <section>
+            <h3>Tipy pro hru</h3>
+            <p>Střídejte hráče strategicky podle jejich silných stránek.</p>
+            <p>U těžších otázek zvažte, kdo zvládne pracovat pod tlakem sám.</p>
+            <p>Týmová dohoda při „druhé šanci“ může rozhodnout o vítězství.</p>
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <div id="menuErr" class="menu-err" hidden></div>
+    <div class="cards" id="menuCards"></div>
+
+    <footer>
+      <a href="riskuj-editor.html" style="color: #d4e8b8; font-weight: 600">Editor úloh →</a>
+    </footer>
+  </div>
+
+  <script>
+    (function () {
+      var backdrop = document.getElementById("guideBackdrop");
+      var btnOpen = document.getElementById("btnGuide");
+      var btnClose = document.getElementById("btnGuideClose");
+      if (!backdrop || !btnOpen || !btnClose) return;
+
+      function openGuide() {
+        backdrop.hidden = false;
+        backdrop.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
+        btnClose.focus();
+      }
+
+      function closeGuide() {
+        backdrop.hidden = true;
+        backdrop.setAttribute("aria-hidden", "true");
+        document.body.style.overflow = "";
+        btnOpen.focus();
+      }
+
+      btnOpen.addEventListener("click", openGuide);
+      btnClose.addEventListener("click", closeGuide);
+      backdrop.addEventListener("click", function (e) {
+        if (e.target === backdrop) closeGuide();
+      });
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && !backdrop.hidden) {
+          e.preventDefault();
+          closeGuide();
+        }
+      });
+    })();
+  </script>
+  <script src="riskuj-data.js"></script>
+  <script>
+    (function () {
+      var host = document.getElementById("menuCards");
+      var errEl = document.getElementById("menuErr");
+      var btnReset = document.getElementById("btnResetData");
+      var noteEl = document.getElementById("dataNote");
+
+      function deepClone(x) {
+        return JSON.parse(JSON.stringify(x));
+      }
+
+      var originalOrder = null;
+      var originalGames = null;
+      if (window.RISKUJ_MENU_ORDER && window.RISKUJ_GAMES) {
+        try {
+          originalOrder = deepClone(window.RISKUJ_MENU_ORDER);
+          originalGames = deepClone(window.RISKUJ_GAMES);
+        } catch (eOrig) {
+          originalOrder = window.RISKUJ_MENU_ORDER;
+          originalGames = window.RISKUJ_GAMES;
+        }
+      }
+
+      var usingSession = false;
+      try {
+        var rawPrev = sessionStorage.getItem("RISKUJ_EDITOR_PREVIEW");
+        if (rawPrev) {
+          var pack = JSON.parse(rawPrev);
+          if (
+            pack &&
+            Array.isArray(pack.menuOrder) &&
+            pack.games &&
+            typeof pack.games === "object" &&
+            Object.keys(pack.games).length
+          ) {
+            window.RISKUJ_MENU_ORDER = deepClone(pack.menuOrder);
+            window.RISKUJ_GAMES = deepClone(pack.games);
+            usingSession = true;
+          }
+        }
+      } catch (ePrev) {
+        /* ignorovat */
+      }
+      if (!window.RISKUJ_GAMES || !window.RISKUJ_MENU_ORDER) {
+        if (errEl) {
+          errEl.hidden = false;
+          errEl.textContent =
+            "Nepodařilo se načíst riskuj-data.js. Otevři menu přes místní server (node serve-riskuj.js), nebo zkontroluj, že soubor riskuj-data.js leží ve stejné složce jako tato stránka.";
+        }
+        return;
+      }
+
+      function render() {
+        host.innerHTML = "";
+        var order = window.RISKUJ_MENU_ORDER || [];
+        order.forEach(function (id, index) {
+          var g = window.RISKUJ_GAMES[id];
+          if (!g) return;
+          var a = document.createElement("a");
+          a.className = "card";
+          a.href = "riskuj-hra.html?id=" + encodeURIComponent(id);
+          var grade = document.createElement("div");
+          grade.className = "card-grade";
+          var gr = g.grade == null ? 6 : g.grade;
+          grade.textContent = String(gr) + ". ročník";
+          var h2 = document.createElement("h2");
+          h2.textContent = g.title;
+          var desc = document.createElement("p");
+          desc.className = "desc";
+          desc.textContent = g.cardBlurb || g.subtitle;
+          var go = document.createElement("span");
+          go.className = "go";
+          go.textContent = "Hrát →";
+          a.appendChild(grade);
+          a.appendChild(h2);
+          a.appendChild(desc);
+          a.appendChild(go);
+          host.appendChild(a);
+        });
+
+        if (noteEl) {
+          if (usingSession) {
+            noteEl.textContent = "Menu teď používá rozpracovaná/importovaná data z editoru (dokud je neobnovíš).";
+            noteEl.style.display = "block";
+          } else {
+            noteEl.textContent = "";
+            noteEl.style.display = "none";
+          }
+        }
+        if (btnReset) btnReset.hidden = !usingSession;
+      }
+
+      if (btnReset) {
+        btnReset.addEventListener("click", function () {
+          usingSession = false;
+          try {
+            sessionStorage.removeItem("RISKUJ_EDITOR_PREVIEW");
+          } catch (eRm) {}
+          if (originalOrder && originalGames) {
+            window.RISKUJ_MENU_ORDER = deepClone(originalOrder);
+            window.RISKUJ_GAMES = deepClone(originalGames);
+          }
+          render();
+        });
+      }
+
+      render();
+    })();
+  </script>
+</body>
+</html>

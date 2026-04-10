@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Riskuj — editor úloh</title>
+  <style>
+    :root {
+      --bg: #2d3a2e;
+      --card: #384839;
+      --elev: #435544;
+      --border: rgba(245, 250, 235, 0.14);
+      --text: #f0f4e8;
+      --muted: #b4c4a8;
+      --accent: #d4e8b8;
+      --gold: #f0de90;
+      --danger: #f0a8a8;
+      --r: 12px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+      padding: 1rem 1rem 2.5rem;
+    }
+    .top {
+      max-width: 920px;
+      margin: 0 auto 1.25rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.75rem;
+      justify-content: space-between;
+    }
+    .top h1 {
+      margin: 0;
+      font-size: 1.35rem;
+    }
+    .top a {
+      color: var(--accent);
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .top a:hover { text-decoration: underline; }
+    .toolbar {
+      max-width: 920px;
+      margin: 0 auto 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+    }
+    button, .btn-file {
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 0.5rem 0.9rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--elev);
+      color: var(--text);
+      cursor: pointer;
+    }
+    button:hover { filter: brightness(1.08); }
+    button.primary {
+      background: linear-gradient(135deg, #c4a035, #a88428);
+      color: #1a1f16;
+      border: none;
+    }
+    button.danger {
+      background: rgba(240, 168, 168, 0.2);
+      color: var(--danger);
+    }
+    .btn-file input { display: none; }
+    .panel {
+      max-width: 920px;
+      margin: 0 auto;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 1.1rem 1.15rem;
+    }
+    .err, .ok {
+      max-width: 920px;
+      margin: 0 auto 1rem;
+      padding: 0.75rem 1rem;
+      border-radius: var(--r);
+      font-size: 0.9rem;
+    }
+    .err {
+      background: rgba(240, 168, 168, 0.15);
+      border: 1px solid rgba(240, 168, 168, 0.4);
+      color: #fecaca;
+    }
+    .ok {
+      background: rgba(120, 200, 140, 0.12);
+      border: 1px solid rgba(140, 210, 160, 0.35);
+      color: #b8f0c8;
+    }
+    label {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 0.25rem;
+      font-weight: 600;
+    }
+    input[type="text"], input[type="number"], textarea, select {
+      width: 100%;
+      font-family: inherit;
+      font-size: 0.95rem;
+      padding: 0.5rem 0.65rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--elev);
+      color: var(--text);
+      margin-bottom: 0.85rem;
+    }
+    textarea { min-height: 4.5rem; resize: vertical; }
+    .row2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+    @media (max-width: 640px) { .row2 { grid-template-columns: 1fr; } }
+    .topic-block {
+      background: rgba(0, 0, 0, 0.12);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+    .topic-head {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: flex-end;
+      margin-bottom: 0.75rem;
+    }
+    .topic-head label { margin: 0; flex: 1; min-width: 140px; }
+    .pts-block {
+      border-left: 3px solid var(--gold);
+      padding-left: 0.75rem;
+      margin-bottom: 0.85rem;
+    }
+    .pts-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--gold);
+      margin-bottom: 0.35rem;
+    }
+    .order-help {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: -0.5rem;
+      margin-bottom: 0.75rem;
+    }
+    .order-ui {
+      margin-top: -0.5rem;
+      margin-bottom: 0.85rem;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.10);
+      padding: 0.6rem 0.6rem 0.4rem;
+    }
+    .order-ui-head {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+      color: var(--muted);
+      font-size: 0.85rem;
+      font-weight: 650;
+    }
+    .order-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: 0.45rem;
+    }
+    .order-item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 0.5rem;
+      align-items: center;
+      padding: 0.45rem 0.55rem;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--elev);
+    }
+    .order-id {
+      font-family: ui-monospace, "Cascadia Code", "Segoe UI Mono", Menlo, monospace;
+      font-size: 0.92rem;
+      color: var(--text);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .order-actions {
+      display: inline-flex;
+      gap: 0.4rem;
+    }
+    .order-actions button {
+      padding: 0.35rem 0.55rem;
+      border-radius: 9px;
+      min-width: 2.25rem;
+      line-height: 1;
+    }
+    .hidden { display: none !important; }
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.55);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      z-index: 9999;
+    }
+    .modal {
+      width: min(560px, 100%);
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 1rem 1.1rem;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+    }
+    .modal h3 {
+      margin: 0 0 0.4rem;
+      font-size: 1.05rem;
+      color: var(--text);
+    }
+    .modal p {
+      margin: 0 0 0.9rem;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+    .modal .actions {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+    .modal button.secondary {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+  </style>
+</head>
+<body>
+  <div class="top">
+    <h1>Editor úloh Riskuj</h1>
+    <nav>
+      <a href="riskuj-menu.html" id="linkMenu">← Úvodní menu</a> ·
+      <a href="#" id="linkPreview">Náhled hry</a> ·
+    </nav>
+  </div>
+
+  <div id="loadErr" class="err hidden"></div>
+  <div id="saveOk" class="ok hidden"></div>
+
+  <div class="toolbar">
+    <select id="gamePick" title="Vyber sadu"></select>
+    <button type="button" id="btnNew">Nová sada</button>
+    <button type="button" class="danger" id="btnDel">Smazat sadu</button>
+    <button type="button" class="primary" id="btnExport">Stáhnout riskuj-data.js</button>
+    <label class="btn-file">
+      <input type="file" id="fileImport" accept=".js,.json,application/json,text/javascript" />
+      Importovat soubor
+    </label>
+  </div>
+
+  <div class="panel" id="editorPanel">
+    <label for="fId">Identifikátor sady (slug v URL, např. zlomky)</label>
+    <input type="text" id="fId" autocomplete="off" spellcheck="false" />
+
+    <div class="row2">
+      <div>
+        <label for="fTitle">Nadpis (název sady)</label>
+        <input type="text" id="fTitle" />
+      </div>
+      <div>
+        <label for="fSubtitle">Podnadpis</label>
+        <input type="text" id="fSubtitle" />
+      </div>
+    </div>
+
+    <div class="row2">
+      <div>
+        <label for="fGrade">Ročník</label>
+        <input type="number" id="fGrade" min="1" max="9" step="1" />
+      </div>
+      <div></div>
+    </div>
+
+    <label for="fBlurb">Krátký popis na kartu v menu</label>
+    <textarea id="fBlurb" rows="2"></textarea>
+
+    <label for="fOrder">Pořadí v menu (jeden identifikátor na řádek)</label>
+    <p class="order-help">
+      Pořadí řádků = pořadí karet v menu. Při exportu se na konec doplní sady, které v seznamu chybí (aby se nic neztratilo). Prázdné řádky se ignorují.
+    </p>
+    <textarea id="fOrder" rows="8" spellcheck="false"></textarea>
+    <div class="order-ui" id="orderUi">
+      <div class="order-ui-head">
+        <span>Rychlé přesouvání (šipkami)</span>
+        <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap; justify-content:flex-end">
+          <button type="button" id="btnOrderSortGrade">Seřadit podle ročníků</button>
+          <span style="font-weight:600; color: var(--muted)">Tip: můžeš i ručně upravit text výše.</span>
+        </div>
+      </div>
+      <ul class="order-list" id="orderList"></ul>
+    </div>
+
+    <h2 style="font-size:1rem;margin:1.25rem 0 0.5rem;color:var(--muted)">Témata a úlohy (2 / 4 / 6 bodů)</h2>
+    <div id="topicsRoot"></div>
+    <button type="button" id="btnAddTopic">+ Přidat téma</button>
+  </div>
+
+  <div id="confirmOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+    <div class="modal">
+      <h3 id="confirmTitle">Potvrzení</h3>
+      <p id="confirmMsg"></p>
+      <div class="actions">
+        <button type="button" class="secondary" id="confirmNo">Zrušit</button>
+        <button type="button" class="danger" id="confirmYes">Smazat</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="riskuj-data.js"></script>
+  <script>
+    (function () {
+      var state = { menuOrder: [], games: {} };
+      var currentId = null;
+
+      var elLoadErr = document.getElementById("loadErr");
+      var elSaveOk = document.getElementById("saveOk");
+      var elPick = document.getElementById("gamePick");
+      var elPanel = document.getElementById("editorPanel");
+      var elTopics = document.getElementById("topicsRoot");
+      var elFId = document.getElementById("fId");
+      var elFTitle = document.getElementById("fTitle");
+      var elFSubtitle = document.getElementById("fSubtitle");
+      var elFGrade = document.getElementById("fGrade");
+      var elFBlurb = document.getElementById("fBlurb");
+      var elFOrder = document.getElementById("fOrder");
+      var elOrderList = document.getElementById("orderList");
+      var elConfirmOverlay = document.getElementById("confirmOverlay");
+      var elConfirmMsg = document.getElementById("confirmMsg");
+      var elConfirmNo = document.getElementById("confirmNo");
+      var elConfirmYes = document.getElementById("confirmYes");
+      var onConfirmYes = null;
+
+      function showErr(msg) {
+        elLoadErr.textContent = msg;
+        elLoadErr.classList.remove("hidden");
+        elSaveOk.classList.add("hidden");
+      }
+      function showOk(msg) {
+        elSaveOk.textContent = msg;
+        elSaveOk.classList.remove("hidden");
+        elLoadErr.classList.add("hidden");
+        setTimeout(function () {
+          elSaveOk.classList.add("hidden");
+        }, 4000);
+      }
+
+      function askConfirm(message, yesLabel, onYes) {
+        onConfirmYes = typeof onYes === "function" ? onYes : null;
+        elConfirmMsg.textContent = message || "";
+        elConfirmYes.textContent = yesLabel || "OK";
+        elConfirmOverlay.classList.remove("hidden");
+        setTimeout(function () {
+          try { elConfirmNo.focus(); } catch (e) {}
+        }, 0);
+      }
+
+      function closeConfirm() {
+        elConfirmOverlay.classList.add("hidden");
+        onConfirmYes = null;
+      }
+
+      elConfirmNo.addEventListener("click", function () {
+        closeConfirm();
+      });
+      elConfirmOverlay.addEventListener("click", function (e) {
+        if (e.target === elConfirmOverlay) closeConfirm();
+      });
+      document.addEventListener("keydown", function (e) {
+        if (elConfirmOverlay.classList.contains("hidden")) return;
+        if (e.key === "Escape") closeConfirm();
+      });
+      elConfirmYes.addEventListener("click", function () {
+        var fn = onConfirmYes;
+        closeConfirm();
+        if (fn) fn();
+      });
+
+      function deepClone(x) {
+        return JSON.parse(JSON.stringify(x));
+      }
+
+      function init() {
+        var loadedFromSession = false;
+        try {
+          var rawPrev = sessionStorage.getItem("RISKUJ_EDITOR_PREVIEW");
+          if (rawPrev) {
+            var pack = JSON.parse(rawPrev);
+            if (
+              pack &&
+              Array.isArray(pack.menuOrder) &&
+              pack.games &&
+              typeof pack.games === "object" &&
+              Object.keys(pack.games).length
+            ) {
+              state.menuOrder = deepClone(pack.menuOrder);
+              state.games = deepClone(pack.games);
+              loadedFromSession = true;
+            }
+          }
+        } catch (ePrev) {
+          /* ignorovat a spadnout na riskuj-data.js */
+        }
+
+        if (!window.RISKUJ_GAMES || !window.RISKUJ_MENU_ORDER) {
+          if (!loadedFromSession) {
+            showErr("Nepodařilo se načíst riskuj-data.js. Otevři editor přes node serve-riskuj.js nebo z jedné složky s daty.");
+            elPanel.style.opacity = "0.5";
+            elPanel.style.pointerEvents = "none";
+            return;
+          }
+        }
+        if (!loadedFromSession) {
+          state.menuOrder = deepClone(window.RISKUJ_MENU_ORDER);
+          state.games = deepClone(window.RISKUJ_GAMES);
+        }
+        Object.keys(state.games || {}).forEach(function (id) {
+          var g = state.games[id];
+          if (!g || typeof g !== "object") return;
+          if (g.grade == null) g.grade = 6;
+          if (Array.isArray(g.topics)) {
+            g.topics.forEach(function (t) {
+              if (!t || typeof t !== "object") return;
+              if (t.bonus == null) t.bonus = false;
+              normalizeTopicTasks(t);
+            });
+          }
+        });
+        refreshPick();
+        if (state.menuOrder.length) {
+          selectGame(state.menuOrder[0]);
+        }
+        if (loadedFromSession) {
+          showOk("Načtena rozpracovaná data z náhledu (import / úpravy z editoru).");
+        }
+      }
+
+      function refreshPick() {
+        var v = elPick.value;
+        elPick.innerHTML = "";
+        state.menuOrder.forEach(function (id) {
+          if (!state.games[id]) return;
+          var o = document.createElement("option");
+          o.value = id;
+          o.textContent = state.games[id].title + " (" + id + ")";
+          elPick.appendChild(o);
+        });
+        if (v && state.games[v]) elPick.value = v;
+        else if (currentId && state.games[currentId]) elPick.value = currentId;
+      }
+
+      function basePts() {
+        return [2, 4, 6];
+      }
+
+      function displayPts(isBonus) {
+        return isBonus ? { 2: 4, 4: 8, 6: 12 } : { 2: 2, 4: 4, 6: 6 };
+      }
+
+      function blankTasks() {
+        var t = {};
+        basePts().forEach(function (p) {
+          t[p] = { q: "", a: "" };
+        });
+        return t;
+      }
+
+      function normalizeTopicTasks(topic) {
+        if (!topic) return;
+        if (!topic.tasks || typeof topic.tasks !== "object") topic.tasks = {};
+        basePts().forEach(function (p) {
+          if (!topic.tasks[p]) topic.tasks[p] = { q: "", a: "" };
+        });
+      }
+
+      function toggleBonusTopic(topic, makeBonus) {
+        if (!topic) return;
+        topic.bonus = !!makeBonus;
+        normalizeTopicTasks(topic);
+      }
+
+      function newGameTemplate(id) {
+        return {
+          title: "Nová sada",
+          subtitle: "Uprav název a úlohy",
+          grade: 6,
+          cardBlurb: "Krátký popis.",
+          topics: [
+            { id: "t1", label: "Téma 1", bonus: false, tasks: blankTasks() },
+            { id: "t2", label: "Téma 2", bonus: false, tasks: blankTasks() },
+            { id: "t3", label: "Téma 3", bonus: false, tasks: blankTasks() },
+            { id: "t4", label: "Téma 4", bonus: false, tasks: blankTasks() },
+          ],
+        };
+      }
+
+      function readOrderFromTextarea() {
+        var lines = elFOrder.value.split(/\r?\n/);
+        var out = [];
+        lines.forEach(function (line) {
+          var id = line.trim();
+          if (id) out.push(id);
+        });
+        return out;
+      }
+
+      function applyOrderFromState() {
+        elFOrder.value = state.menuOrder.join("\n");
+        renderOrderUi();
+      }
+
+      function renderOrderUi() {
+        if (!elOrderList) return;
+        elOrderList.innerHTML = "";
+        var order = readOrderFromTextarea();
+        order.forEach(function (id, idx) {
+          var li = document.createElement("li");
+          li.className = "order-item";
+          var name = document.createElement("div");
+          name.className = "order-id";
+          name.textContent = id;
+          var actions = document.createElement("div");
+          actions.className = "order-actions";
+
+          var up = document.createElement("button");
+          up.type = "button";
+          up.textContent = "↑";
+          up.title = "Posunout nahoru";
+          up.disabled = idx === 0;
+          up.addEventListener("click", function () {
+            var arr = readOrderFromTextarea();
+            if (idx <= 0 || idx >= arr.length) return;
+            var tmp = arr[idx - 1];
+            arr[idx - 1] = arr[idx];
+            arr[idx] = tmp;
+            state.menuOrder = arr;
+            applyOrderFromState();
+          });
+
+          var down = document.createElement("button");
+          down.type = "button";
+          down.textContent = "↓";
+          down.title = "Posunout dolů";
+          down.disabled = idx === order.length - 1;
+          down.addEventListener("click", function () {
+            var arr = readOrderFromTextarea();
+            if (idx < 0 || idx >= arr.length - 1) return;
+            var tmp = arr[idx + 1];
+            arr[idx + 1] = arr[idx];
+            arr[idx] = tmp;
+            state.menuOrder = arr;
+            applyOrderFromState();
+          });
+
+          actions.appendChild(up);
+          actions.appendChild(down);
+          li.appendChild(name);
+          li.appendChild(actions);
+          elOrderList.appendChild(li);
+        });
+      }
+
+      function sortOrderByGrade() {
+        if (currentId) readFormIntoGame(currentId);
+        var order = readOrderFromTextarea();
+        var scored = order.map(function (id, idx) {
+          var g = state.games && state.games[id];
+          var gr = g && g.grade != null ? Number(g.grade) : Number.POSITIVE_INFINITY;
+          var title = (g && g.title) || "";
+          return { id: id, idx: idx, grade: Number.isFinite(gr) ? gr : Number.POSITIVE_INFINITY, title: title };
+        });
+        scored.sort(function (a, b) {
+          if (a.grade !== b.grade) return a.grade - b.grade;
+          var at = String(a.title).toLocaleLowerCase("cs");
+          var bt = String(b.title).toLocaleLowerCase("cs");
+          if (at < bt) return -1;
+          if (at > bt) return 1;
+          return a.idx - b.idx;
+        });
+        state.menuOrder = scored.map(function (x) {
+          return x.id;
+        });
+        applyOrderFromState();
+      }
+
+      function readFormIntoGame(id) {
+        var g = state.games[id];
+        if (!g) return;
+        g.title = elFTitle.value.trim();
+        g.subtitle = elFSubtitle.value.trim();
+        var gv = Number(String(elFGrade.value || "").trim());
+        g.grade = Number.isFinite(gv) && gv > 0 ? Math.round(gv) : 6;
+        g.cardBlurb = elFBlurb.value.trim();
+        state.menuOrder = readOrderFromTextarea();
+
+        var blocks = elTopics.querySelectorAll(".topic-block");
+        var topics = [];
+        blocks.forEach(function (block, ti) {
+          var tidEl = block.querySelector(".topic-id");
+          var labEl = block.querySelector(".topic-label");
+          var bonusEl = block.querySelector(".topic-bonus");
+          var tid = (tidEl && tidEl.value.trim()) || "t" + (ti + 1);
+          var label = (labEl && labEl.value.trim()) || "Téma " + (ti + 1);
+          var isBonus = !!(bonusEl && bonusEl.checked);
+          var tasks = {};
+          basePts().forEach(function (pts) {
+            var qEl = block.querySelector('.task-q[data-pts="' + pts + '"]');
+            var aEl = block.querySelector('.task-a[data-pts="' + pts + '"]');
+            if (!qEl && !aEl) return;
+            tasks[pts] = {
+              q: qEl ? qEl.value.trim() : "",
+              a: aEl ? aEl.value.trim() : "",
+            };
+          });
+          var topic = { id: tid, label: label, bonus: isBonus, tasks: tasks };
+          normalizeTopicTasks(topic);
+          topics.push(topic);
+        });
+        g.topics = topics;
+      }
+
+      function renderTopics(g) {
+        elTopics.innerHTML = "";
+        g.topics.forEach(function (topic, ti) {
+          var wrap = document.createElement("div");
+          wrap.className = "topic-block";
+          var head = document.createElement("div");
+          head.className = "topic-head";
+          head.innerHTML =
+            '<label>ID tématu<input type="text" class="topic-id" value="" /></label>' +
+            '<label>Název řádku na tabuli<input type="text" class="topic-label" value="" /></label>' +
+            '<label style="flex:0 0 auto; min-width:auto"><input type="checkbox" class="topic-bonus" /> Bonusové téma</label>' +
+            '<button type="button" class="topic-del danger">Odstranit téma</button>';
+          wrap.appendChild(head);
+          head.querySelector(".topic-id").value = topic.id || "t" + (ti + 1);
+          head.querySelector(".topic-label").value = topic.label || "";
+          var bonusCb = head.querySelector(".topic-bonus");
+          bonusCb.checked = !!topic.bonus;
+          bonusCb.addEventListener("change", function () {
+            readFormIntoGame(currentId);
+            toggleBonusTopic(g.topics[ti], !!bonusCb.checked);
+            renderTopics(g);
+          });
+          head.querySelector(".topic-del").addEventListener("click", function () {
+            if (g.topics.length <= 1) {
+              alert("Sada musí mít aspoň jedno téma.");
+              return;
+            }
+            readFormIntoGame(currentId);
+            g.topics.splice(ti, 1);
+            renderTopics(g);
+          });
+
+          normalizeTopicTasks(topic);
+          var map = displayPts(!!topic.bonus);
+          basePts().forEach(function (slotPts) {
+            var pts = map[slotPts];
+            var tb = document.createElement("div");
+            tb.className = "pts-block";
+            var t = (topic.tasks && topic.tasks[slotPts]) || { q: "", a: "" };
+            tb.innerHTML =
+              '<div class="pts-label">' +
+              pts +
+              " body</div>" +
+              '<label>Zadání<textarea class="task-q" data-pts="' +
+              slotPts +
+              '" rows="3" placeholder="Zadání (násobení ·, dělení :, zlomky 3/4, složené 1/(2/3), (2/3)/4)"></textarea></label>' +
+              '<label>Řešení<textarea class="task-a" data-pts="' +
+              slotPts +
+              '" rows="2" placeholder="Řešení (násobení ·, dělení :, zlomky vč. složených 1/(2/3))"></textarea></label>';
+            wrap.appendChild(tb);
+            tb.querySelector(".task-q").value = t.q || "";
+            tb.querySelector(".task-a").value = t.a || "";
+          });
+          elTopics.appendChild(wrap);
+        });
+      }
+
+      function selectGame(id) {
+        if (!state.games[id]) return;
+        currentId = id;
+        elPick.value = id;
+        var g = state.games[id];
+        elFId.value = id;
+        elFTitle.value = g.title || "";
+        elFSubtitle.value = g.subtitle || "";
+        elFGrade.value = String(g.grade == null ? 6 : g.grade);
+        elFBlurb.value = g.cardBlurb || "";
+        applyOrderFromState();
+        renderTopics(g);
+      }
+
+      elFOrder.addEventListener("input", function () {
+        // sync UI list while typing/pasting
+        state.menuOrder = readOrderFromTextarea();
+        renderOrderUi();
+      });
+
+      var btnOrderSortGrade = document.getElementById("btnOrderSortGrade");
+      if (btnOrderSortGrade) {
+        btnOrderSortGrade.addEventListener("click", function () {
+          sortOrderByGrade();
+        });
+      }
+
+      function renameGameId(oldId, newId) {
+        newId = newId.trim().replace(/\s+/g, "-").replace(/[^a-zA-Z0-9\-]/g, "").toLowerCase();
+        if (!newId) {
+          alert("Identifikátor nesmí být prázdný.");
+          return false;
+        }
+        if (oldId !== newId) {
+          if (state.games[newId]) {
+            alert("Sada s ID „" + newId + "“ už existuje.");
+            return false;
+          }
+          state.games[newId] = state.games[oldId];
+          delete state.games[oldId];
+          state.menuOrder = state.menuOrder.map(function (x) {
+            return x === oldId ? newId : x;
+          });
+          currentId = newId;
+          elFId.value = newId;
+        }
+        return true;
+      }
+
+      elPick.addEventListener("change", function () {
+        if (currentId) readFormIntoGame(currentId);
+        selectGame(elPick.value);
+      });
+
+      document.getElementById("btnAddTopic").addEventListener("click", function () {
+        if (!currentId) return;
+        readFormIntoGame(currentId);
+        var g = state.games[currentId];
+        g.topics.push({
+          id: "t" + (g.topics.length + 1),
+          label: "Nové téma",
+          tasks: blankTasks(),
+        });
+        renderTopics(g);
+      });
+
+      document.getElementById("btnNew").addEventListener("click", function () {
+        if (currentId) readFormIntoGame(currentId);
+        var base = prompt("Technický identifikátor nové sady (jen písmena, čísla, pomlčka):", "moje-sada");
+        if (!base) return;
+        base = base.trim().replace(/\s+/g, "-").replace(/[^a-zA-Z0-9\-]/g, "").toLowerCase();
+        if (!base) return;
+        if (state.games[base]) {
+          alert("Tento identifikátor už existuje.");
+          return;
+        }
+        state.games[base] = newGameTemplate(base);
+        state.menuOrder.push(base);
+        refreshPick();
+        selectGame(base);
+        applyOrderFromState();
+        showOk("Nová sada „" + base + "“. Uprav obsah a stáhni riskuj-data.js.");
+      });
+
+      document.getElementById("btnDel").addEventListener("click", function () {
+        if (!currentId) return;
+        var delId = currentId;
+        askConfirm("Opravdu smazat sadu „" + delId + "“?", "Smazat", function () {
+          if (!delId || !state.games[delId]) return;
+          delete state.games[delId];
+          state.menuOrder = state.menuOrder.filter(function (x) {
+            return x !== delId;
+          });
+          currentId = null;
+          refreshPick();
+          if (state.menuOrder.length) selectGame(state.menuOrder[0]);
+          else {
+            elFId.value = "";
+            elFTitle.value = "";
+            elFSubtitle.value = "";
+            elFBlurb.value = "";
+            elFOrder.value = "";
+            elTopics.innerHTML = "";
+          }
+        });
+      });
+
+      elFId.addEventListener("change", function () {
+        var nid = elFId.value.trim();
+        if (!nid || !currentId) return;
+        if (!renameGameId(currentId, nid)) {
+          elFId.value = currentId;
+          return;
+        }
+        refreshPick();
+        applyOrderFromState();
+      });
+
+      function parseBracketSlice(s, start) {
+        var depth = 0;
+        var inStr = false;
+        var esc = false;
+        for (var j = start; j < s.length; j++) {
+          var ch = s[j];
+          if (esc) {
+            esc = false;
+            continue;
+          }
+          if (inStr) {
+            if (ch === "\\") esc = true;
+            else if (ch === '"') inStr = false;
+            continue;
+          }
+          if (ch === '"') {
+            inStr = true;
+            continue;
+          }
+          if (ch === "[" || ch === "{") depth++;
+          else if (ch === "]" || ch === "}") {
+            depth--;
+            if (depth === 0) return JSON.parse(s.slice(start, j + 1));
+          }
+        }
+        throw new Error("Nedokončený JSON v souboru.");
+      }
+
+      function extractWindowVar(txt, name) {
+        var key = "window." + name + " =";
+        var i = txt.indexOf(key);
+        if (i < 0) {
+          key = name + " =";
+          i = txt.indexOf(key);
+        }
+        if (i < 0) return null;
+        i = txt.indexOf("=", i) + 1;
+        while (i < txt.length && /\s/.test(txt[i])) i++;
+        if (i >= txt.length) return null;
+        return parseBracketSlice(txt, i);
+      }
+
+      function buildJsFile() {
+        var header =
+          "/**\n" +
+          " * Databáze her Matematické riskuj (ZŠ).\n" +
+          " * Vygenerováno / upraveno v riskuj-editor.html — zkontroluj úlohy před hrou.\n" +
+          " */\n";
+        var order = readOrderFromTextarea();
+        order = order.filter(function (id) {
+          return state.games[id];
+        });
+        var seen = {};
+        order = order.filter(function (id) {
+          if (seen[id]) return false;
+          seen[id] = true;
+          return true;
+        });
+        Object.keys(state.games).forEach(function (id) {
+          if (order.indexOf(id) < 0) order.push(id);
+        });
+        state.menuOrder = order;
+
+        var body =
+          "window.RISKUJ_MENU_ORDER = " +
+          JSON.stringify(order, null, 2) +
+          ";\n\n" +
+          "window.RISKUJ_GAMES = " +
+          JSON.stringify(state.games, null, 2) +
+          ";\n";
+        return header + body;
+      }
+
+      document.getElementById("btnExport").addEventListener("click", function () {
+        if (currentId) readFormIntoGame(currentId);
+        var text = buildJsFile();
+        var blob = new Blob([text], { type: "text/javascript;charset=utf-8" });
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "riskuj-data.js";
+        a.click();
+        URL.revokeObjectURL(a.href);
+        showOk("Soubor riskuj-data.js stažen — nahraď jím starý soubor ve složce projektu.");
+      });
+
+      document.getElementById("fileImport").addEventListener("change", function (e) {
+        var f = e.target.files && e.target.files[0];
+        e.target.value = "";
+        if (!f) return;
+        var r = new FileReader();
+        r.onload = function () {
+          try {
+            var txt = String(r.result || "").trim();
+            var loaded = false;
+
+            if (txt.charAt(0) === "{") {
+              var j = JSON.parse(txt);
+              if (j.menuOrder && j.games) {
+                state.menuOrder = deepClone(j.menuOrder);
+                state.games = deepClone(j.games);
+                loaded = true;
+              }
+            }
+            if (!loaded) {
+              var mo = extractWindowVar(txt, "RISKUJ_MENU_ORDER");
+              var gm = extractWindowVar(txt, "RISKUJ_GAMES");
+              if (mo && gm) {
+                state.menuOrder = deepClone(mo);
+                state.games = deepClone(gm);
+                loaded = true;
+              }
+            }
+
+            if (!loaded) {
+              showErr(
+                "Soubor nešlo načíst. Použij stažený riskuj-data.js, nebo .json ze zálohy (menuOrder + games).",
+              );
+              return;
+            }
+            refreshPick();
+            if (state.menuOrder.length) selectGame(state.menuOrder[0]);
+            showOk("Import hotový. Zkontroluj sady a ulož exportem do projektu.");
+          } catch (err) {
+            showErr("Chyba při čtení souboru: " + (err.message || err));
+          }
+        };
+        r.readAsText(f);
+      });
+
+      elFTitle.addEventListener(
+        "change",
+        function () {
+          if (currentId) readFormIntoGame(currentId);
+          refreshPick();
+        },
+      );
+
+      document.getElementById("linkPreview").addEventListener("click", function (e) {
+        e.preventDefault();
+        if (!Object.keys(state.games).length) {
+          alert("Není žádná sada k náhledu.");
+          return;
+        }
+        if (currentId) readFormIntoGame(currentId);
+        var gid = currentId || state.menuOrder[0];
+        try {
+          sessionStorage.setItem(
+            "RISKUJ_EDITOR_PREVIEW",
+            JSON.stringify({ menuOrder: state.menuOrder, games: state.games }),
+          );
+        } catch (err) {
+          showErr("Náhled se nepodařilo připravit (límity úložiště prohlížeče nebo privátní režim).");
+          return;
+        }
+        location.href = "riskuj-hra.html?id=" + encodeURIComponent(gid) + "&preview=1";
+      });
+
+      document.getElementById("linkMenu").addEventListener("click", function (e) {
+        e.preventDefault();
+        if (currentId) readFormIntoGame(currentId);
+        try {
+          sessionStorage.setItem(
+            "RISKUJ_EDITOR_PREVIEW",
+            JSON.stringify({ menuOrder: state.menuOrder, games: state.games }),
+          );
+        } catch (err) {
+          /* ignorovat — menu pak použije riskuj-data.js */
+        }
+        location.href = "riskuj-menu.html";
+      });
+
+      init();
+    })();
+  </script>
+</body>
+</html>

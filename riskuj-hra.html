@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Matematické riskuj</title>
+  <!-- Bez externích fontů — funguje i přes file:// a v náhledu bez sítě -->
+  <style>
+    :root {
+      /* Téma „školní tabule“ — tmavá olivová zeleň, křídové barvy */
+      --bg: #2d3a2e;
+      --bg-card: #384839;
+      --bg-elevated: #435544;
+      --border: rgba(245, 250, 235, 0.14);
+      --text: #f0f4e8;
+      --muted: #b4c4a8;
+      --accent: #d4e8b8;
+      --accent-soft: rgba(212, 232, 184, 0.12);
+      --gold: #f0de90;
+      --gold-dim: rgba(240, 222, 144, 0.18);
+      --success: #9fdfb1;
+      --danger: #f0a8a8;
+      --radius: 14px;
+      --shadow: 0 14px 36px rgba(0, 0, 0, 0.35);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      background: var(--bg);
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      background-image:
+        radial-gradient(ellipse 85% 55% at 50% -10%, rgba(255, 255, 255, 0.06), transparent),
+        radial-gradient(ellipse 45% 35% at 100% 100%, rgba(0, 0, 0, 0.15), transparent);
+    }
+
+    .app {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1.5rem 1.25rem 2.5rem;
+    }
+
+    .nav-back {
+      margin-bottom: 1rem;
+    }
+
+    .nav-back a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .nav-back a:hover {
+      text-decoration: underline;
+    }
+
+    header.page-header {
+      text-align: center;
+      margin-bottom: 1.75rem;
+    }
+
+    /* Bez background-clip:text — jinak může být nadpis na Chromu „neviditelný“ */
+    header.page-header h1 {
+      margin: 0 0 0.35rem;
+      font-size: clamp(1.5rem, 4vw, 2rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      text-shadow: 0 2px 0 rgba(0, 0, 0, 0.25);
+    }
+
+    header.page-header p {
+      margin: 0;
+      font-size: 1.05rem;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    /* Subtitle je pro hru schovaný (neznámé téma ho může dočasně zobrazit). */
+    #gameSubtitle {
+      display: none;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr minmax(260px, 300px);
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .board-wrap {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      padding: 1rem;
+      overflow: hidden;
+    }
+
+    .board-head {
+      display: grid;
+      grid-template-columns: minmax(140px, 1.1fr) repeat(3, 1fr);
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+      padding: 0 0.25rem;
+    }
+
+    .board-head .corner {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      display: flex;
+      align-items: flex-end;
+      padding-bottom: 0.25rem;
+    }
+
+    .board-head .pts {
+      text-align: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: var(--gold);
+      padding: 0.5rem;
+      background: var(--gold-dim);
+      border-radius: 10px;
+    }
+
+    .topic-row {
+      display: grid;
+      grid-template-columns: minmax(140px, 1.1fr) repeat(3, 1fr);
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+      align-items: stretch;
+    }
+
+    .topic-label {
+      padding: 0.85rem 1rem;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.92rem;
+      line-height: 1.3;
+      display: flex;
+      align-items: center;
+      border: 1px solid transparent;
+      gap: 0.55rem;
+    }
+
+    .bonus-badge {
+      display: inline-flex;
+      align-items: center;
+      height: 1.35rem;
+      padding: 0 0.55rem;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #1a1f16;
+      background: linear-gradient(135deg, #f0de90, #c4a035);
+      box-shadow: 0 10px 24px rgba(240, 222, 144, 0.18);
+      flex: 0 0 auto;
+    }
+
+    .topic-row.is-bonus .topic-label {
+      border-color: rgba(240, 222, 144, 0.7);
+      box-shadow:
+        0 0 0 3px rgba(240, 222, 144, 0.12),
+        0 16px 30px rgba(0, 0, 0, 0.18);
+    }
+
+    .topic-row.is-bonus .cell-btn:not(:disabled) {
+      border-color: rgba(240, 222, 144, 0.6);
+      box-shadow: 0 0 0 2px rgba(240, 222, 144, 0.08) inset;
+    }
+
+    .topic-row[data-i="0"] .topic-label {
+      background: linear-gradient(135deg, rgba(200, 220, 180, 0.15), var(--bg-elevated));
+      border-color: rgba(200, 230, 170, 0.35);
+      color: #e8f5d8;
+    }
+    .topic-row[data-i="1"] .topic-label {
+      background: linear-gradient(135deg, rgba(160, 210, 200, 0.14), var(--bg-elevated));
+      border-color: rgba(160, 220, 200, 0.3);
+      color: #d0ebe4;
+    }
+    .topic-row[data-i="2"] .topic-label {
+      background: linear-gradient(135deg, rgba(230, 190, 210, 0.12), var(--bg-elevated));
+      border-color: rgba(230, 190, 210, 0.28);
+      color: #f3e0eb;
+    }
+    .topic-row[data-i="3"] .topic-label {
+      background: linear-gradient(135deg, rgba(240, 200, 150, 0.14), var(--bg-elevated));
+      border-color: rgba(245, 210, 160, 0.32);
+      color: #ffe8cc;
+    }
+
+    .cell-btn {
+      appearance: none;
+      border: none;
+      border-radius: 12px;
+      font-family: ui-monospace, "Cascadia Code", "Segoe UI Mono", Menlo, monospace;
+      font-size: 1.25rem;
+      font-weight: 500;
+      cursor: pointer;
+      color: var(--gold);
+      background: linear-gradient(180deg, #4a5c48 0%, #3d4d3c 100%);
+      border: 1px solid var(--border);
+      transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.2s;
+      min-height: 52px;
+    }
+
+    .cell-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+      border-color: rgba(240, 222, 144, 0.45);
+    }
+
+    .cell-btn:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    .cell-btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.4;
+      background: #2f3b2e;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .sidebar {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      padding: 1.15rem;
+    }
+
+    .sidebar h2 {
+      margin: 0 0 1rem;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .team-row {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin-bottom: 0.65rem;
+      padding: 0.5rem 0.35rem;
+      background: var(--bg-elevated);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .team-row--summary {
+      justify-content: center;
+      padding: 0.65rem 0.75rem;
+    }
+
+    .team-row--summary .team-meta {
+      flex: none;
+    }
+
+    .team-row button.score {
+      flex-shrink: 0;
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      border: none;
+      font-size: 1.35rem;
+      line-height: 1;
+      cursor: pointer;
+      font-weight: 600;
+      transition: filter 0.15s, transform 0.1s;
+    }
+
+    .team-row button.score:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .team-row button.minus {
+      background: rgba(251, 113, 133, 0.2);
+      color: var(--danger);
+    }
+    .team-row button.minus:hover:not(:disabled) {
+      filter: brightness(1.15);
+      transform: scale(1.05);
+    }
+    .team-row button.minus.is-on {
+      background: rgba(251, 113, 133, 0.42);
+      box-shadow: inset 0 0 0 2px rgba(251, 113, 133, 0.65);
+      color: #fecaca;
+    }
+
+    .team-row button.plus {
+      background: rgba(52, 211, 153, 0.2);
+      color: var(--success);
+    }
+    .team-row button.plus:hover:not(:disabled) {
+      filter: brightness(1.15);
+      transform: scale(1.05);
+    }
+    .team-row button.plus.is-on {
+      background: rgba(52, 211, 153, 0.45);
+      box-shadow: inset 0 0 0 2px rgba(52, 211, 153, 0.7);
+      color: #c8ffd8;
+    }
+
+    .team-row button.score.zero {
+      background: rgba(180, 196, 168, 0.15);
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    .team-row button.score.zero:hover:not(:disabled) {
+      filter: brightness(1.15);
+      transform: scale(1.05);
+      color: var(--text);
+    }
+    .team-row button.score.zero.is-on {
+      background: rgba(212, 232, 184, 0.22);
+      box-shadow: inset 0 0 0 2px rgba(212, 232, 184, 0.45);
+      color: var(--accent);
+    }
+
+    .team-row .score-group {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      flex-shrink: 0;
+      padding: 0.2rem;
+      border-radius: 12px;
+      background: rgba(0, 0, 0, 0.12);
+      border: 1px solid var(--border);
+    }
+
+    .team-meta {
+      flex: 1;
+      min-width: 0;
+      text-align: center;
+    }
+
+    .team-meta .name {
+      font-weight: 600;
+      font-size: 0.95rem;
+      margin-bottom: 0.15rem;
+    }
+
+    .team-meta .score-val {
+      font-family: ui-monospace, "Cascadia Code", "Segoe UI Mono", Menlo, monospace;
+      font-size: 1.1rem;
+      color: var(--accent);
+    }
+
+    .add-team {
+      width: 100%;
+      margin-top: 0.5rem;
+      padding: 0.75rem;
+      border-radius: 12px;
+      border: 1px dashed rgba(148, 163, 184, 0.45);
+      background: transparent;
+      color: var(--muted);
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+
+    .add-team:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .hint-active {
+      margin-top: 1rem;
+      padding: 0.75rem;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      background: var(--accent-soft);
+      border: 1px solid rgba(212, 232, 184, 0.28);
+      color: var(--accent);
+      line-height: 1.45;
+    }
+
+    .hint-active strong {
+      color: var(--text);
+    }
+
+    /* Modal: zavřený = display:none (žádný překryv, žádný backdrop-filter — ten umí „vymazat“ obsah) */
+    .backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      background: rgba(12, 18, 12, 0.82);
+    }
+
+    .backdrop.open {
+      display: flex;
+      /* Kliky mimo okno projdou k obsahu pod překryvem (sidebar se skóre) */
+      pointer-events: none;
+    }
+
+    /* Aby při průchozím kliku nešlo omylem otevřít další pole na tabuli */
+    body.riskuj-modal-open .board-wrap {
+      pointer-events: none;
+    }
+
+    .modal {
+      width: min(720px, 100%);
+      max-height: min(92vh, 900px);
+      overflow: auto;
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      padding: 1.5rem;
+      transform: scale(0.96) translateY(8px);
+      transition: transform 0.22s ease;
+    }
+
+    .backdrop.open .modal {
+      pointer-events: auto;
+      transform: scale(1) translateY(0);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .modal-badge {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+    }
+
+    .modal-points {
+      font-family: ui-monospace, "Cascadia Code", "Segoe UI Mono", Menlo, monospace;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--gold);
+      white-space: nowrap;
+    }
+
+    .modal h3 {
+      margin: 0 0 0.75rem;
+      font-size: 1.05rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .modal-task {
+      font-size: clamp(1.35rem, 2.8vw, 1.95rem);
+      line-height: 1.5;
+      margin-bottom: 1.25rem;
+      padding: 1.35rem 1.25rem;
+      background: var(--bg-elevated);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      font-weight: 500;
+    }
+
+    .modal-task i.math-var,
+    .solution-box i.math-var {
+      font-style: italic;
+      font-family: inherit;
+      letter-spacing: 0.02em;
+    }
+
+    .modal-task .math-frac,
+    .solution-box .math-frac,
+    .topic-label .math-frac {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      vertical-align: middle;
+      line-height: 1.08;
+      font-size: 0.88em;
+      margin: 0 0.12em;
+      font-weight: 600;
+    }
+
+    .modal-task .math-frac-num,
+    .solution-box .math-frac-num,
+    .topic-label .math-frac-num {
+      border-bottom: 0.09em solid currentColor;
+      padding: 0 0.2em 0.05em;
+    }
+
+    .modal-task .math-frac-den,
+    .solution-box .math-frac-den,
+    .topic-label .math-frac-den {
+      padding: 0.08em 0.2em 0;
+    }
+
+    .modal-task .math-frac .math-frac,
+    .solution-box .math-frac .math-frac,
+    .topic-label .math-frac .math-frac {
+      font-size: 0.88em;
+      line-height: 1.05;
+      margin: 0.06em 0;
+      font-weight: 600;
+    }
+
+    .modal-task .math-mixed,
+    .solution-box .math-mixed,
+    .topic-label .math-mixed {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.12em;
+      vertical-align: middle;
+      margin: 0 0.08em;
+      font-weight: 600;
+    }
+
+    .modal-teams {
+      margin-top: 1.25rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .modal-teams h4 {
+      margin: 0 0 0.75rem;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .modal-teams .team-row {
+      margin-bottom: 0.5rem;
+    }
+
+    .modal-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .btn {
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 0.65rem 1.1rem;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      transition: filter 0.15s, transform 0.1s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #c4a035, #a88428);
+      color: #1a1f16;
+    }
+
+    .btn-primary:hover {
+      filter: brightness(1.08);
+    }
+
+    .btn-ghost {
+      background: var(--bg-elevated);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost:hover {
+      border-color: rgba(240, 222, 144, 0.45);
+    }
+
+    .solution-box {
+      padding: 1rem;
+      border-radius: 12px;
+      background: rgba(120, 200, 140, 0.12);
+      border: 1px solid rgba(140, 210, 160, 0.3);
+      font-size: clamp(1.15rem, 2.2vw, 1.4rem);
+      line-height: 1.5;
+      margin-bottom: 1rem;
+      display: none;
+    }
+
+    .solution-box.visible {
+      display: block;
+    }
+
+    .solution-box .lab {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--success);
+      margin-bottom: 0.35rem;
+    }
+
+    .modal-footer-note {
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    @media (forced-colors: active) {
+      html,
+      body {
+        background: Canvas !important;
+        color: CanvasText !important;
+      }
+
+      header.page-header h1,
+      header.page-header p,
+      .topic-label,
+      .cell-btn {
+        color: CanvasText !important;
+      }
+    }
+  </style>
+</head>
+<body style="background-color: #2d3a2e; color: #f0f4e8">
+  <div class="app">
+    <nav class="nav-back" aria-label="Zpět na menu">
+      <a href="riskuj-menu.html" id="navBackLink">← Úvodní menu</a>
+    </nav>
+    <header class="page-header">
+      <h1 id="gameTitle" style="color: #f0f4e8">Matematické riskuj</h1>
+      <p id="gameSubtitle" style="color: #c8d8bc">Načítání…</p>
+    </header>
+
+    <div class="layout">
+      <div class="board-wrap">
+        <div id="board">
+          <p style="margin: 0; padding: 1rem; color: #b4c4a8; text-align: center">Načítám tabuli…</p>
+        </div>
+      </div>
+
+      <aside class="sidebar">
+        <h2>Skóre týmů</h2>
+        <div id="teams">
+          <p id="teamsPlaceholder" style="margin: 0 0 0.75rem; font-size: 0.9rem; color: #b4c4a8">Načítání týmů…</p>
+        </div>
+        <button type="button" class="add-team" id="addTeam">+ Přidat tým</button>
+      </aside>
+    </div>
+  </div>
+
+  <div class="backdrop" id="backdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-labelledby="modalTitle" aria-modal="true">
+      <div class="modal-header">
+        <div>
+          <div class="modal-badge" id="modalTopic"></div>
+          <h3 id="modalTitle">Úkol</h3>
+        </div>
+        <div class="modal-points" id="modalPoints"></div>
+      </div>
+      <div class="modal-task" id="modalTask"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-primary" id="btnSolution">Zobrazit řešení</button>
+        <button type="button" class="btn btn-ghost" id="btnCloseModal">Zavřít</button>
+      </div>
+      <div class="solution-box" id="solutionBox">
+        <div class="lab">Řešení</div>
+        <div id="solutionText"></div>
+      </div>
+      <p class="modal-footer-note" style="display:none"></p>
+      <div class="modal-teams">
+        <h4>Bodování u tohoto úkolu</h4>
+        <div id="teamsInModal" aria-label="Přidání bodů k úkolu"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="riskuj-data.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      function newTeamId() {
+        if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+          return crypto.randomUUID();
+        }
+        return "t-" + Math.random().toString(36).slice(2) + "-" + Date.now().toString(36);
+      }
+
+      var params = new URLSearchParams(location.search);
+      if (params.get("preview") === "1") {
+        var backLink = document.getElementById("navBackLink");
+        var backNav = backLink && backLink.closest(".nav-back");
+        if (backNav) backNav.setAttribute("aria-label", "Zpět do editoru");
+        if (backLink) {
+          backLink.href = "riskuj-editor.html";
+          backLink.textContent = "← Zpět do editoru";
+        }
+        try {
+          var raw = sessionStorage.getItem("RISKUJ_EDITOR_PREVIEW");
+          if (raw) {
+            var pack = JSON.parse(raw);
+            if (pack && pack.games && typeof pack.games === "object") {
+              window.RISKUJ_GAMES = pack.games;
+              if (Array.isArray(pack.menuOrder)) window.RISKUJ_MENU_ORDER = pack.menuOrder;
+            }
+          }
+        } catch (ePrev) {
+          /* nechat riskuj-data.js */
+        }
+      }
+
+      if (!window.RISKUJ_GAMES) {
+        var b0 = document.getElementById("board");
+        if (b0) b0.innerHTML = "<p style=\"padding:1rem;color:#f0a8a8\">Chybí soubor riskuj-data.js (musí být ve stejné složce).</p>";
+        return;
+      }
+
+      var gameId = params.get("id") || "desetinne";
+      var game = window.RISKUJ_GAMES[gameId];
+      var gameTitleEl = document.getElementById("gameTitle");
+      var gameSubtitleEl = document.getElementById("gameSubtitle");
+      var boardEl = document.getElementById("board");
+
+      if (!game) {
+        document.title = "Riskuj — neznámé téma";
+        if (gameTitleEl) gameTitleEl.textContent = "Neznámé téma";
+        if (gameSubtitleEl) {
+          gameSubtitleEl.style.display = "block";
+          if (params.get("preview") === "1") {
+            gameSubtitleEl.innerHTML =
+              'Zpět do <a href="riskuj-editor.html" style="color:#d4e8b8">editoru</a>.';
+          } else {
+            gameSubtitleEl.innerHTML =
+              'Zpět do <a href="riskuj-menu.html" style="color:#d4e8b8">úvodního menu</a>.';
+          }
+        }
+        if (boardEl) {
+          boardEl.innerHTML =
+            "<p style=\"padding:1.5rem;color:#f0a8a8;text-align:center\">Toto téma neexistuje. Použij platný kód v adrese, např. <code style=\"color:#f0f4e8\">?id=zlomky</code>.</p>";
+        }
+        return;
+      }
+
+      document.title = "Riskuj — " + game.title;
+      if (gameTitleEl) gameTitleEl.textContent = game.title;
+      if (gameSubtitleEl) gameSubtitleEl.textContent = "";
+
+      var TOPICS = game.topics;
+
+      function topicPoints(topic) {
+        if (topic && topic.bonus) return [4, 8, 12];
+        return [2, 4, 6];
+      }
+
+      function taskSlotFromPoints(topic, pts) {
+        if (topic && topic.bonus) {
+          if (pts === 4) return 2;
+          if (pts === 8) return 4;
+          if (pts === 12) return 6;
+        }
+        return pts;
+      }
+
+      function getTask(topic, pts) {
+        if (!topic || !topic.tasks) return null;
+        var slot = taskSlotFromPoints(topic, pts);
+        return topic.tasks[slot];
+      }
+
+      const used = new Set();
+      let teams = [
+        { id: newTeamId(), name: "Tým A", score: 0 },
+        { id: newTeamId(), name: "Tým B", score: 0 },
+      ];
+      let activePoints = null;
+      let openKey = null;
+      /** Přepínač za tým u otevřeného úkolu; chybějící klíč = výchozí 0 */
+      let teamAwardState = {};
+
+      const teamsEl = document.getElementById("teams");
+      const backdrop = document.getElementById("backdrop");
+      const modalTopic = document.getElementById("modalTopic");
+      const modalTitle = document.getElementById("modalTitle");
+      const modalPoints = document.getElementById("modalPoints");
+      const modalTask = document.getElementById("modalTask");
+      const solutionBox = document.getElementById("solutionBox");
+      const solutionText = document.getElementById("solutionText");
+      const btnSolution = document.getElementById("btnSolution");
+      const btnCloseModal = document.getElementById("btnCloseModal");
+      const addTeamBtn = document.getElementById("addTeam");
+      const scoreHint = document.getElementById("scoreHint");
+      const hintPoints = document.getElementById("hintPoints");
+      const teamsPlaceholder = document.getElementById("teamsPlaceholder");
+      const teamsInModalEl = document.getElementById("teamsInModal");
+
+      function cellKey(topicIndex, pts) {
+        return topicIndex + "-" + pts;
+      }
+
+      function escapeHtml(str) {
+        return String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+      }
+
+      /** Jednopísmenné proměnné (a–z): kurzíva. Koeficient·proměnná bez pokračování slabikou. */
+      function italicizeMathVariables(raw) {
+        var s = String(raw);
+        if (!s) return "";
+        var noWordContinue = "(?![a-záčďéěíňóřšťúůýž])";
+        var L = "[a-z]";
+
+        function sub(re, fn) {
+          s = s.replace(re, fn);
+        }
+
+        sub(/(^|\s)číslo\s+(x|y|z)\s+tak/gi, "$1číslo <i>$2</i> tak");
+        sub(/(^|\s)zlomek\s+(x|y|z)\s*,/gi, "$1zlomek <i>$2</i>,");
+        sub(/(^|\s)číslo\s+(x|y|z):\s*/gi, "$1číslo <i>$2</i>: ");
+        sub(/([0-9]+,[0-9]+)\s*<\s*(x)\s*<\s*([0-9]+,[0-9]+)/gi, "$1 < <i>$2</i> < $3");
+        sub(/([0-9]+\/[0-9]+)\s*<\s*(x)\s*<\s*([0-9]+\/[0-9]+)/gi, "$1 < <i>$2</i> < $3");
+        sub(new RegExp("trojnásobku\\s+(" + L + ")\\s+a\\s+poloviny", "gi"), "trojnásobku <i>$1</i> a poloviny");
+        sub(new RegExp("poloviny\\s+(" + L + ")([\\s.,:]|$)", "gi"), "poloviny <i>$1</i>$2");
+        sub(new RegExp("dvojnásobek\\s+(" + L + ")\\s+zapiš", "gi"), "dvojnásobek <i>$1</i> zapiš");
+        sub(new RegExp("\\bUrči\\s+(" + L + ")\\s*\\.", "gi"), "Urči <i>$1</i>.");
+        sub(/\bnebo\s+2\s*·\s*x\b/gi, "nebo 2 · <i>x</i>");
+        sub(/(^|[\s„(])2\s*·\s*x([\s.,;)]|$)/gi, function (_, pre, post) {
+          return pre + "2 · <i>x</i>" + post;
+        });
+
+        sub(new RegExp("·\\s*(" + L + ")\\s*(\\+|=)", "gi"), "· <i>$1</i> $2");
+        sub(new RegExp("·\\(\\s*(" + L + ")\\s*\\+", "g"), "·(<i>$1</i> + ");
+        sub(new RegExp("\\(\\s*(" + L + ")\\s*\\+", "gi"), "(<i>$1</i> + ");
+        sub(new RegExp("\\(\\s*(" + L + ")\\s*−", "g"), "(<i>$1</i> − ");
+
+        sub(new RegExp("\\+\\s*(" + L + ")\\s*:\\s*2", "gi"), "+ <i>$1</i> : 2");
+
+        sub(new RegExp("→\\s*(" + L + ")\\+([0-9]+)\\s*=\\s*([0-9]+)", "g"), "→ <i>$1</i>+$2=$3");
+        sub(new RegExp("→\\s*(" + L + ")\\s*=\\s*([0-9]+)", "g"), "→ <i>$1</i> = $2");
+        sub(new RegExp("→\\s*(" + L + ")\\s*\\+", "g"), "→ <i>$1</i> + ");
+
+        sub(new RegExp("\\b(" + L + ")\\s*\\+\\s*(" + L + ")([\u2212−\\-])", "g"), "<i>$1</i> + <i>$2</i>$3");
+        sub(new RegExp("\\b(" + L + ")\\s*=\\s*(" + L + ")\\s*:", "gi"), "<i>$1</i> = <i>$2</i> :");
+        sub(new RegExp("\\b(" + L + ")\\+([0-9]+)\\s*=\\s*([0-9]+)", "gi"), "<i>$1</i>+$2=$3");
+        sub(new RegExp("\\b(" + L + ")(?=\\s*[\u2212−\\-]\\s*[0-9])", "gi"), "<i>$1</i>");
+
+        sub(new RegExp("([0-9]+)(" + L + ")" + noWordContinue, "gi"), "$1<i>$2</i>");
+
+        sub(new RegExp("\\s(" + L + ")\\s*=\\s*([0-9]+)(?=[\\s.)]|$)", "g"), " <i>$1</i> = $2");
+
+        while (s.indexOf("<i><i>") !== -1) {
+          s = s.replace(/<i><i>/g, "<i>");
+        }
+        while (s.indexOf("</i></i>") !== -1) {
+          s = s.replace(/<\/i><\/i>/g, "</i>");
+        }
+        return s;
+      }
+
+      function fracHtml(num, den) {
+        return (
+          '<span class="math-frac"><span class="math-frac-num">' +
+          num +
+          '</span><span class="math-frac-den">' +
+          den +
+          "</span></span>"
+        );
+      }
+
+      function convertFractionsInPlainSegment(text) {
+        var s = text;
+        s = s.replace(/\b(\d+)\s+(\d+)\/(\d+)\b/g, function (_, w, n, d) {
+          return (
+            '<span class="math-mixed"><span class="math-mixed-whole">' +
+            w +
+            "</span>" +
+            fracHtml(n, d) +
+            "</span>"
+          );
+        });
+        /* Pokud je na jedné straně lomítka jediný nečíselný znak (např. x/45, 6/y), vykresli jako zlomek. */
+        s = s.replace(
+          /(^|[^\p{L}\p{N}_])([\p{L}\?])\s*\/\s*(\d+)\b/gu,
+          function (_, pre, v, d) {
+            return pre + fracHtml(v, d);
+          }
+        );
+        s = s.replace(
+          /\b(\d+)\s*\/\s*([\p{L}\?])(?=$|[^\p{L}\p{N}_])/gu,
+          function (_, n, v) {
+            return fracHtml(n, v);
+          }
+        );
+        /* Složené zlomky (čitatel nebo jmenovatel je zlomek) — před prostým n/d */
+        s = s.replace(/\b\((\d+)\/(\d+)\)\/\((\d+)\/(\d+)\)\b/g, function (_, a, b, c, d) {
+          return (
+            '<span class="math-frac"><span class="math-frac-num">' +
+            fracHtml(a, b) +
+            '</span><span class="math-frac-den">' +
+            fracHtml(c, d) +
+            "</span></span>"
+          );
+        });
+        s = s.replace(/\b(\d+)\/\((\d+)\/(\d+)\)\b/g, function (_, n, a, b) {
+          return (
+            '<span class="math-frac"><span class="math-frac-num">' +
+            n +
+            '</span><span class="math-frac-den">' +
+            fracHtml(a, b) +
+            "</span></span>"
+          );
+        });
+        s = s.replace(/\b\((\d+)\/(\d+)\)\/(\d+)\b/g, function (_, a, b, d) {
+          return (
+            '<span class="math-frac"><span class="math-frac-num">' +
+            fracHtml(a, b) +
+            '</span><span class="math-frac-den">' +
+            d +
+            "</span></span>"
+          );
+        });
+        s = s.replace(/\b(\d+)\/(\d+)\b/g, function (_, n, d) {
+          return fracHtml(n, d);
+        });
+        return s;
+      }
+
+      function findSpanBlockEnd(s, start) {
+        if (s.slice(start, start + 5) !== "<span") return -1;
+        var gt = s.indexOf(">", start);
+        if (gt < 0) return -1;
+        var depth = 1;
+        var i = gt + 1;
+        while (i < s.length && depth > 0) {
+          var open = s.indexOf("<span", i);
+          var close = s.indexOf("</span>", i);
+          if (close < 0) return -1;
+          if (open >= 0 && open < close) {
+            depth++;
+            var g2 = s.indexOf(">", open);
+            i = g2 < 0 ? open + 5 : g2 + 1;
+          } else {
+            depth--;
+            i = close + 7;
+          }
+        }
+        return i;
+      }
+
+      function findSupBlockEnd(s, start) {
+        if (s.slice(start, start + 4) !== "<sup") return -1;
+        var gt = s.indexOf(">", start);
+        if (gt < 0) return -1;
+        var close = s.indexOf("</sup>", gt + 1);
+        if (close < 0) return -1;
+        return close + 6;
+      }
+
+      function escapeRichMathHtml(s) {
+        var out = "";
+        var i = 0;
+        while (i < s.length) {
+          if (s.slice(i, i + 3) === "<i>") {
+            var ei = s.indexOf("</i>", i);
+            if (ei < 0) {
+              out += escapeHtml(s[i]);
+              i++;
+              continue;
+            }
+            out += '<i class="math-var">' + escapeHtml(s.slice(i + 3, ei)) + "</i>";
+            i = ei + 4;
+            continue;
+          }
+          if (s.slice(i, i + 5) === "<span") {
+            var end = findSpanBlockEnd(s, i);
+            if (end < 0) {
+              out += "&lt;";
+              i++;
+              continue;
+            }
+            out += s.slice(i, end);
+            i = end;
+            continue;
+          }
+          if (s.slice(i, i + 4) === "<sup") {
+            var endSup = findSupBlockEnd(s, i);
+            if (endSup < 0) {
+              out += "&lt;";
+              i++;
+              continue;
+            }
+            out += s.slice(i, endSup);
+            i = endSup;
+            continue;
+          }
+          if (s[i] === "<") {
+            out += "&lt;";
+            i++;
+            continue;
+          }
+          var lt = s.indexOf("<", i);
+          if (lt < 0) lt = s.length;
+          out += escapeHtml(s.slice(i, lt));
+          i = lt;
+        }
+        return out;
+      }
+
+      function prettySupExpr(expr) {
+        var e = String(expr || "").trim();
+        e = e.replace(/\s+/g, " ");
+        e = e.replace(/([+\-*/=])/g, " $1 ");
+        e = e.replace(/\s+/g, " ").trim();
+        return e;
+      }
+
+      function convertPowersInPlainSegment(s) {
+        if (!s) return s;
+        // ^2, ^10, ...
+        s = s.replace(/\^(\d+)\b/g, function (_, n) {
+          return "<sup>" + n + "</sup>";
+        });
+        // ^(n+2), ^(2x-1), ...
+        s = s.replace(/\^\(([^)]+)\)/g, function (_, expr) {
+          return "<sup>" + escapeHtml(prettySupExpr(expr)) + "</sup>";
+        });
+        return s;
+      }
+
+      function formatMathHtml(raw) {
+        var marked = italicizeMathVariables(raw);
+        var parts = marked.split(/(<[^>]+>)/g);
+        for (var pi = 0; pi < parts.length; pi++) {
+          if (parts[pi] && parts[pi].charAt(0) !== "<") {
+            parts[pi] = convertFractionsInPlainSegment(parts[pi]);
+            parts[pi] = convertPowersInPlainSegment(parts[pi]);
+          }
+        }
+        return escapeRichMathHtml(parts.join(""));
+      }
+
+      function renderBoard() {
+        if (!boardEl) return;
+        boardEl.innerHTML = "";
+        TOPICS.forEach(function (topic, ti) {
+          var row = document.createElement("div");
+          row.className = "topic-row" + (topic && topic.bonus ? " is-bonus" : "");
+          row.setAttribute("data-i", String(ti % 4)); /* styl štítku: cyklus 4 barev i pro 5+ témat */
+          var label = document.createElement("div");
+          label.className = "topic-label";
+          if (topic && topic.bonus) {
+            label.innerHTML = '<span class="bonus-badge">Bonus</span>' + formatMathHtml(topic.label);
+          } else {
+            label.innerHTML = formatMathHtml(topic.label);
+          }
+          row.appendChild(label);
+          topicPoints(topic).forEach(function (pts) {
+            var btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "cell-btn";
+            btn.setAttribute("data-ti", String(ti));
+            btn.setAttribute("data-pts", String(pts));
+            var key = cellKey(ti, pts);
+            if (used.has(key)) {
+              btn.disabled = true;
+              btn.textContent = "—";
+            } else {
+              btn.textContent = String(pts);
+            }
+            row.appendChild(btn);
+          });
+          boardEl.appendChild(row);
+        });
+      }
+
+      function pointsWord(n) {
+        var k = Math.floor(Math.abs(n));
+        if (k === 1) return "bod";
+        if (k >= 11 && k <= 14) return "bodů";
+        var last = k % 10;
+        if (last >= 2 && last <= 4) return "body";
+        return "bodů";
+      }
+
+      function awardEffect(choice) {
+        if (choice === "plus") return activePoints;
+        if (choice === "minus") return -activePoints / 2;
+        return 0;
+      }
+
+      function currentAwardChoice(teamId) {
+        var c = teamAwardState[teamId];
+        return c === "plus" || c === "minus" ? c : "zero";
+      }
+
+      function setTeamAwardChoice(teamId, newChoice) {
+        if (activePoints === null) return;
+        var t = teams.find(function (x) {
+          return x.id === teamId;
+        });
+        if (!t) return;
+        var oldChoice = currentAwardChoice(teamId);
+        if (oldChoice === newChoice) return;
+        t.score += awardEffect(newChoice) - awardEffect(oldChoice);
+        if (newChoice === "zero") delete teamAwardState[teamId];
+        else teamAwardState[teamId] = newChoice;
+        renderTeams();
+      }
+
+      function renderTeamsInto(container, withScoreButtons) {
+        if (!container) return;
+        container.innerHTML = "";
+        var disableScoring = activePoints === null;
+
+        teams.forEach(function (team) {
+          var row = document.createElement("div");
+          row.className = withScoreButtons ? "team-row" : "team-row team-row--summary";
+          if (withScoreButtons) row.setAttribute("aria-label", team.name + " — přepínač bodů");
+
+          var meta = document.createElement("div");
+          meta.className = "team-meta";
+          var nameEl = document.createElement("div");
+          nameEl.className = "name";
+          nameEl.textContent = team.name;
+          var scoreEl = document.createElement("div");
+          scoreEl.className = "score-val";
+          scoreEl.textContent = team.score + " " + pointsWord(team.score);
+          meta.appendChild(nameEl);
+          meta.appendChild(scoreEl);
+
+          if (withScoreButtons) {
+            var on = currentAwardChoice(team.id);
+
+            var group = document.createElement("div");
+            group.className = "score-group";
+
+            var plus = document.createElement("button");
+            plus.type = "button";
+            plus.className = "score plus" + (on === "plus" ? " is-on" : "");
+            plus.textContent = "+";
+            plus.setAttribute("aria-pressed", on === "plus" ? "true" : "false");
+            plus.title = activePoints
+              ? "Celé body (+" + activePoints + " " + pointsWord(activePoints) + ")"
+              : "Otevřete úkol";
+            plus.disabled = disableScoring;
+            plus.addEventListener("click", function () {
+              setTeamAwardChoice(team.id, "plus");
+            });
+
+            var zero = document.createElement("button");
+            zero.type = "button";
+            zero.className = "score zero" + (on === "zero" ? " is-on" : "");
+            zero.textContent = "0";
+            zero.setAttribute("aria-pressed", on === "zero" ? "true" : "false");
+            zero.title = activePoints ? "0 bodů (výchozí)" : "Otevřete úkol";
+            zero.disabled = disableScoring;
+            zero.addEventListener("click", function () {
+              setTeamAwardChoice(team.id, "zero");
+            });
+
+            var minus = document.createElement("button");
+            minus.type = "button";
+            minus.className = "score minus" + (on === "minus" ? " is-on" : "");
+            minus.textContent = "−";
+            minus.setAttribute("aria-pressed", on === "minus" ? "true" : "false");
+            minus.title = activePoints
+              ? "Polovina bodů dolů (" + activePoints / 2 + " " + pointsWord(activePoints / 2) + ")"
+              : "Otevřete úkol";
+            minus.disabled = disableScoring;
+            minus.addEventListener("click", function () {
+              setTeamAwardChoice(team.id, "minus");
+            });
+
+            group.appendChild(plus);
+            group.appendChild(zero);
+            group.appendChild(minus);
+
+            row.appendChild(meta);
+            row.appendChild(group);
+          } else {
+            row.appendChild(meta);
+          }
+
+          container.appendChild(row);
+        });
+      }
+
+      function renderTeams() {
+        if (!teamsEl) return;
+        if (teamsPlaceholder && teamsPlaceholder.parentNode) {
+          teamsPlaceholder.remove();
+        }
+        renderTeamsInto(teamsEl, false);
+        if (teamsInModalEl) {
+          if (backdrop && backdrop.classList.contains("open")) {
+            renderTeamsInto(teamsInModalEl, true);
+          } else {
+            teamsInModalEl.innerHTML = "";
+          }
+        }
+      }
+
+      function openModal(topicIndex, pts) {
+        var topic = TOPICS[topicIndex];
+        if (!topic) return;
+        var task = getTask(topic, pts);
+        if (!task || used.has(cellKey(topicIndex, pts))) return;
+
+        openKey = cellKey(topicIndex, pts);
+        activePoints = pts;
+        teamAwardState = {};
+        if (modalTopic) modalTopic.textContent = topic.label;
+        if (modalTitle) modalTitle.textContent = "Úkol";
+        if (modalPoints) modalPoints.textContent = pts + " " + pointsWord(pts);
+        if (modalTask) modalTask.innerHTML = formatMathHtml(task.q);
+        if (solutionText) solutionText.innerHTML = formatMathHtml(task.a);
+        if (solutionBox) solutionBox.classList.remove("visible");
+        if (btnSolution) btnSolution.style.display = "inline-block";
+
+        document.body.classList.add("riskuj-modal-open");
+        if (backdrop) {
+          backdrop.classList.add("open");
+          backdrop.setAttribute("aria-hidden", "false");
+        }
+        if (scoreHint) scoreHint.hidden = false;
+        if (hintPoints) {
+          hintPoints.textContent =
+            pts +
+            " " +
+            pointsWord(pts) +
+            " (+" +
+            pts +
+            " / 0 / −" +
+            pts / 2 +
+            ")";
+        }
+
+        renderTeams();
+      }
+
+      function closeModal() {
+        if (openKey) {
+          used.add(openKey);
+          openKey = null;
+        }
+        document.body.classList.remove("riskuj-modal-open");
+        if (backdrop) {
+          backdrop.classList.remove("open");
+          backdrop.setAttribute("aria-hidden", "true");
+        }
+        activePoints = null;
+        teamAwardState = {};
+        if (scoreHint) scoreHint.hidden = true;
+        renderBoard();
+        renderTeams();
+      }
+
+      try {
+        if (!boardEl || !teamsEl) {
+          throw new Error("Chybí #board nebo #teams");
+        }
+
+        boardEl.addEventListener("click", function (e) {
+          var btn = e.target.closest(".cell-btn");
+          if (!btn || btn.disabled) return;
+          var ti = Number(btn.getAttribute("data-ti"));
+          var pts = Number(btn.getAttribute("data-pts"));
+          if (used.has(cellKey(ti, pts))) return;
+          openModal(ti, pts);
+        });
+
+        if (btnSolution) {
+          btnSolution.addEventListener("click", function () {
+            if (solutionBox) solutionBox.classList.add("visible");
+            btnSolution.style.display = "none";
+          });
+        }
+        if (btnCloseModal) btnCloseModal.addEventListener("click", closeModal);
+        if (backdrop) {
+          backdrop.addEventListener("click", function (e) {
+            if (e.target === backdrop) closeModal();
+          });
+        }
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "Escape" && backdrop && backdrop.classList.contains("open")) closeModal();
+        });
+        if (addTeamBtn) {
+          addTeamBtn.addEventListener("click", function () {
+            var n = teams.length + 1;
+            var letter = String.fromCharCode(64 + n);
+            teams.push({ id: newTeamId(), name: "Tým " + letter, score: 0 });
+            renderTeams();
+          });
+        }
+
+        renderBoard();
+        renderTeams();
+      } catch (err) {
+        console.error(err);
+        if (boardEl) {
+          boardEl.insertAdjacentHTML(
+            "beforeend",
+            "<p style=\"padding:1rem;color:#f0a8a8\">Chyba: " +
+              String((err && err.message) || err) +
+              "</p>",
+          );
+        }
+      }
+    });
+  </script>
+  <noscript>
+    <p style="padding: 1rem; text-align: center; color: #f0f4e8;">
+      Zapni JavaScript — bez něj se tabule nenačte.
+    </p>
+  </noscript>
+</body>
+</html>
