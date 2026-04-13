@@ -251,35 +251,35 @@ window.RISKUJ_GAMES = {
         "bonus": false,
         "tasks": {
           "2": {
-            "q": "NSD čísel 12 a 18.",
+            "q": "Najdi největší společný dělitel čísel 12 a 18.",
             "a": "6"
           },
           "4": {
-            "q": "NSD(48, 72) =",
+            "q": "NSD (48, 72) =",
             "a": "24"
           },
           "6": {
-            "q": "NSD(84,126) =",
+            "q": "NSD (84, 126) =",
             "a": "42"
           }
         }
       },
       {
         "id": "d4",
-        "label": "NSN",
+        "label": "nsn",
         "bonus": false,
         "tasks": {
           "2": {
-            "q": "NSN čísel 4 a 6.",
+            "q": "Najdi nejmenší společný násobek čísel 4 a 6.",
             "a": "12"
           },
           "4": {
-            "q": "NSN(6, 8) = ?",
-            "a": "24"
+            "q": "nsn (6, 20) =",
+            "a": "60"
           },
           "6": {
-            "q": "Dvě tramvaje jedou v okruhu 12 a 18 minut. Za kolik minut se poprvé znovu sejdou na konečné?",
-            "a": "NSN(12,18) = 36 minut."
+            "q": "nsn (24, 20) =",
+            "a": "120"
           }
         }
       }
@@ -734,16 +734,16 @@ window.RISKUJ_GAMES = {
         "bonus": false,
         "tasks": {
           "2": {
-            "q": "40 % = ? (desetinně)",
+            "q": "Zapiš 40 % jako desetinné číslo.",
             "a": "0,4"
           },
           "4": {
-            "q": "3/4 = ? %",
+            "q": "Zapiš 3/4 pomocí procent.",
             "a": "75 %"
           },
           "6": {
-            "q": "0,08 = ? %; zapiš totéž jako zlomek v základním tvaru",
-            "a": "8 %; 2/25"
+            "q": "Zapiš 0,2 % jako zlomek v základním tvaru.",
+            "a": "1/500"
           }
         }
       },
@@ -753,8 +753,8 @@ window.RISKUJ_GAMES = {
         "bonus": false,
         "tasks": {
           "2": {
-            "q": "10 % z 90 =",
-            "a": "9"
+            "q": "10 % z 900 =",
+            "a": "90"
           },
           "4": {
             "q": "35 % z 200 =",
@@ -772,7 +772,7 @@ window.RISKUJ_GAMES = {
         "bonus": false,
         "tasks": {
           "2": {
-            "q": "12 z 48 = ? %",
+            "q": "200 z 800 = ? %",
             "a": "25 %"
           },
           "4": {
@@ -791,16 +791,16 @@ window.RISKUJ_GAMES = {
         "bonus": false,
         "tasks": {
           "2": {
-            "q": "17 : 0,5 =",
-            "a": "34"
+            "q": "5 % z celku je 20. Kolik je celek?",
+            "a": "400"
           },
           "4": {
-            "q": "15 : 0,12 =",
-            "a": "125"
+            "q": "12 % z celku je 360. Kolik je celek?",
+            "a": "3 000"
           },
           "6": {
-            "q": "9 : 0,04 =",
-            "a": "225"
+            "q": "150 % z celku je 6. Kolik je celek?",
+            "a": "4"
           }
         }
       }
