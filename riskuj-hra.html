@@ -944,6 +944,13 @@
             "</span></span>"
           );
         });
+        /* (−1)/8 nebo (-1)/8 — záporný čitatel v závorkách jako jeden zlomek (ne −1/8 před zlomkem) */
+        s = s.replace(
+          /\(\s*([\u2212\u2013-]?\d+)\s*\)\s*\/\s*(\d+)\b/g,
+          function (_, numRaw, d) {
+            return fracHtml(numRaw, d);
+          },
+        );
         s = s.replace(/\b(\d+)\/(\d+)\b/g, function (_, n, d) {
           return fracHtml(n, d);
         });
@@ -1099,10 +1106,14 @@
       }
 
       function pointsWord(n) {
-        var k = Math.floor(Math.abs(n));
+        var k = Math.floor(Math.abs(Number(n)));
+        if (!Number.isFinite(k)) return "bodů";
         if (k === 1) return "bod";
-        if (k >= 11 && k <= 14) return "bodů";
+        if (k >= 2 && k <= 4) return "body";
         var last = k % 10;
+        var last2 = k % 100;
+        if (last2 >= 11 && last2 <= 14) return "bodů";
+        if (last === 1) return "bod";
         if (last >= 2 && last <= 4) return "body";
         return "bodů";
       }
@@ -1196,9 +1207,9 @@
               setTeamAwardChoice(team.id, "minus");
             });
 
-            group.appendChild(plus);
-            group.appendChild(zero);
             group.appendChild(minus);
+            group.appendChild(zero);
+            group.appendChild(plus);
 
             row.appendChild(meta);
             row.appendChild(group);

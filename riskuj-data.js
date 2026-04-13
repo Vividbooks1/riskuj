@@ -6,8 +6,12 @@ window.RISKUJ_MENU_ORDER = [
   "desetinne",
   "delitelnost",
   "jednotky",
+  "obsah1",
+  "zlomky1",
   "pomery",
-  "zlomky"
+  "zlomky",
+  "zaporna",
+  "procenta"
 ];
 
 window.RISKUJ_GAMES = {
@@ -115,7 +119,7 @@ window.RISKUJ_GAMES = {
     "grade": 6
   },
   "zlomky": {
-    "title": "Zlomky",
+    "title": "Zlomky 2",
     "subtitle": "Početní operace se zlomky",
     "cardBlurb": "Početní operace se zlomky.",
     "topics": [
@@ -449,5 +453,357 @@ window.RISKUJ_GAMES = {
       }
     ],
     "grade": 7
+  },
+  "zlomky1": {
+    "title": "Zlomky 1",
+    "subtitle": "Rozšiřování, krácení, základní tvar a převody s desetinnými čísly",
+    "cardBlurb": "Rozšiřování a krácení, základní tvar, zlomek a desetinné číslo.",
+    "topics": [
+      {
+        "id": "zk1",
+        "label": "Rozšiřování a krácení",
+        "bonus": false,
+        "tasks": {
+          "2": {
+            "q": "Zlomek 18/24 zkrať číslem 6.",
+            "a": "3/8"
+          },
+          "4": {
+            "q": "Zapiš zlomek 2/3 tak, aby měl ve jmenovateli číslo 15.",
+            "a": "10/15"
+          },
+          "6": {
+            "q": "Doplň číslo za otazník tak, aby platila rovnost: 8/18 = 28/?",
+            "a": "63"
+          }
+        }
+      },
+      {
+        "id": "zk2",
+        "label": "Úprava na základní tvar",
+        "bonus": false,
+        "tasks": {
+          "2": {
+            "q": "Uprav zlomek 6/9 na základní tvar.",
+            "a": "2/3"
+          },
+          "4": {
+            "q": "Uprav zlomek 36/48 na základní tvar.",
+            "a": "3/4"
+          },
+          "6": {
+            "q": "Uprav zlomek 72/108 na základní tvar.",
+            "a": "2/3"
+          }
+        }
+      },
+      {
+        "id": "zk3",
+        "label": "Zlomek na desetinné číslo",
+        "bonus": false,
+        "tasks": {
+          "2": {
+            "q": "Zapiš zlomek 1/5 jako desetinné číslo.",
+            "a": "0,2"
+          },
+          "4": {
+            "q": "Zapiš zlomek 11/20 jako desetinné číslo.",
+            "a": "0,55"
+          },
+          "6": {
+            "q": "Zapiš zlomek 3/8 jako desetinné číslo.",
+            "a": "0,375"
+          }
+        }
+      },
+      {
+        "id": "zk4",
+        "label": "Desetinné číslo na zlomek",
+        "bonus": false,
+        "tasks": {
+          "2": {
+            "q": "Zapiš číslo 0,4 jako zlomek v základním tvaru.",
+            "a": "2/5"
+          },
+          "4": {
+            "q": "Zapiš číslo 0,04 jako zlomek v základním tvaru.",
+            "a": "1/25"
+          },
+          "6": {
+            "q": "Zapiš číslo 2,4 jako zlomek v základním tvaru.",
+            "a": "12/5"
+          }
+        }
+      }
+    ],
+    "grade": 6
+  },
+  "obsah1": {
+    "title": "Obvod a obsah 1",
+    "grade": 6,
+    "cardBlurb": "Obvod a obsah čtverce a obdélníku",
+    "topics": [
+      {
+        "id": "t1",
+        "label": "Obvod čtverce",
+        "bonus": false,
+        "tasks": {
+          "2": {
+            "q": "Vypočítej obvod čtverce s délkou strany 1,2 m.",
+            "a": "4,8 m nebo například 48 dm"
+          },
+          "4": {
+            "q": "Vypočítej obvod čtverce s délkou strany 2,3 m.",
+            "a": "9,2 m nebo například 92 dm"
+          },
+          "6": {
+            "q": "Čtverec má obvod 1 m. Vypočítej délku jeho strany.",
+            "a": "0,25 m nebo například 25 cm"
+          }
+        }
+      },
+      {
+        "id": "t2",
+        "label": "Obsah čtverce",
+        "bonus": false,
+        "tasks": {
+          "2": {
+            "q": "Vypočítej obsah čtverce s délkou strany 4 cm.",
+            "a": "16 cm^2"
+          },
+          "4": {
+            "q": "Vypočítej obsah čtverce s délkou strany 0,3 cm.",
+            "a": "0,09 cm^2 nebo například 9 mm^2"
+          },
+          "6": {
+            "q": "Obvod čtverce je 1,6 m. Kolik m^2 má obsah tohoto čtverce?",
+            "a": "0,16 m^2"
+          }
+        }
+      },
+      {
+        "id": "t3",
+        "label": "Obvod obdélníku",
+        "bonus": false,
+        "tasks": {
+          "2": {
+            "q": "Obdélník má strany o délkách 4 dm a 5 dm. Vypočítej jeho obvod.",
+            "a": "18 dm"
+          },
+          "4": {
+            "q": "Obdélník má strany o délkách 2,2 dm a 0,8 dm. Vypočítej jeho obvod.",
+            "a": "6 dm nebo například 60 cm"
+          },
+          "6": {
+            "q": "Obdélník má obvod 12 cm a zároveň platí, že jedna z jeho stran je o 1 cm delší než druhá. Vypočítej délky jeho stran.",
+            "a": "5,5 cm a 6,5 cm"
+          }
+        }
+      },
+      {
+        "id": "t4",
+        "label": "Obsah obdélníku",
+        "bonus": false,
+        "tasks": {
+          "2": {
+            "q": "Obdélník má strany o délkách 6 cm a 8 cm. Vypočítej jeho obsah.",
+            "a": "48 cm^2"
+          },
+          "4": {
+            "q": "Obdélník má strany o délkách 0,24 m a 2 cm. Vypočítej jeho obsah.",
+            "a": "48 cm^2 nebo například 0,48 dm^2"
+          },
+          "6": {
+            "q": "Obdélník má obsah 16 cm^2 a pro délky jeho stran platí, že jedna z jeho stran je o 6 cm delší než druhá. Vypočítej délky jeho stran.",
+            "a": "2 cm a 8 cm"
+          }
+        }
+      },
+      {
+        "id": "t5",
+        "label": "Extra",
+        "bonus": true,
+        "tasks": {
+          "2": {
+            "q": "Napiš rozměry 2 obdélníků se stejným obsahem, ale různým obvodem.",
+            "a": "Například obdélník 6 cm a 1 cm a obdélník 2 cm a 3 cm."
+          },
+          "4": {
+            "q": "Napiš rozměry čtverce nebo obdélníku, který má obsah 16 cm^2 a nejmenší možný obvod.",
+            "a": "Je to čtverec s délkou strany 4 cm."
+          },
+          "6": {
+            "q": "Obdélník má obvod 24 cm a délky jeho stran se dají zapsat pomocí celého počtu centimetrů. Jaký minimální obsah může obdélník mít?",
+            "a": "11 cm^2"
+          }
+        }
+      }
+    ]
+  },
+  "zaporna": {
+    "title": "Záporná čísla",
+    "cardBlurb": "Porovnávání, početní operace, obtížnější úlohy i s desetinnými čísly a zlomky.",
+    "grade": 7,
+    "topics": [
+      {
+        "id": "zn1",
+        "label": "Porovnávání",
+        "bonus": false,
+        "tasks": {
+          "2": {
+            "q": "Seřaď čísla od nejmenšího po největší: −5; 0; −2.",
+            "a": "−5 < −2 < 0"
+          },
+          "4": {
+            "q": "Napiš jedno číslo, které je větší než –4 a menší než –7.",
+            "a": "Takové číslo neexistuje."
+          },
+          "6": {
+            "q": "Napiš jedno číslo, které je větší než –6,2 a menší než –6,1.",
+            "a": "například –6,15"
+          }
+        }
+      },
+      {
+        "id": "zn2",
+        "label": "Sčítání a odčítání",
+        "bonus": false,
+        "tasks": {
+          "2": {
+            "q": "−8 + 3 =",
+            "a": "−5"
+          },
+          "4": {
+            "q": "−1,6 − (−2,9) =",
+            "a": "1,3"
+          },
+          "6": {
+            "q": "−3/4 + 1/2 − (–1)/8 =",
+            "a": "−1/8"
+          }
+        }
+      },
+      {
+        "id": "zn3",
+        "label": "Násobení a dělení",
+        "bonus": false,
+        "tasks": {
+          "2": {
+            "q": "(−4) · 3 =",
+            "a": "−12"
+          },
+          "4": {
+            "q": "(−1,5) · (−0,4) =",
+            "a": "0,6"
+          },
+          "6": {
+            "q": "(−5/6) : (2/3) =",
+            "a": "−5/4"
+          }
+        }
+      },
+      {
+        "id": "zn4",
+        "label": "Kombinace početních operací",
+        "bonus": true,
+        "tasks": {
+          "2": {
+            "q": "−1 + 2 · (−3) =",
+            "a": "−7"
+          },
+          "4": {
+            "q": "(−2/3 + 1) · (−6) =",
+            "a": "−2"
+          },
+          "6": {
+            "q": "−0,5 · ((−2) · (−2) − 6) – (–1) =",
+            "a": "2"
+          }
+        }
+      }
+    ]
+  },
+  "procenta": {
+    "title": "Procenta",
+    "cardBlurb": "Převody, část celku, podíl v % a základ ze zadané části.",
+    "grade": 7,
+    "topics": [
+      {
+        "id": "pr1",
+        "label": "Procenta, zlomky a desetinná čísla",
+        "bonus": false,
+        "tasks": {
+          "2": {
+            "q": "40 % = ? (desetinně)",
+            "a": "0,4"
+          },
+          "4": {
+            "q": "3/4 = ? %",
+            "a": "75 %"
+          },
+          "6": {
+            "q": "0,08 = ? %; zapiš totéž jako zlomek v základním tvaru",
+            "a": "8 %; 2/25"
+          }
+        }
+      },
+      {
+        "id": "pr2",
+        "label": "Výpočet části celku",
+        "bonus": false,
+        "tasks": {
+          "2": {
+            "q": "10 % z 90 =",
+            "a": "9"
+          },
+          "4": {
+            "q": "35 % z 200 =",
+            "a": "70"
+          },
+          "6": {
+            "q": "7,5 % z 80 =",
+            "a": "6"
+          }
+        }
+      },
+      {
+        "id": "pr3",
+        "label": "Výpočet počtu procent",
+        "bonus": false,
+        "tasks": {
+          "2": {
+            "q": "12 z 48 = ? %",
+            "a": "25 %"
+          },
+          "4": {
+            "q": "27 z 180 = ? %",
+            "a": "15 %"
+          },
+          "6": {
+            "q": "14 z 35 = ? %",
+            "a": "40 %"
+          }
+        }
+      },
+      {
+        "id": "pr4",
+        "label": "Určení základu",
+        "bonus": false,
+        "tasks": {
+          "2": {
+            "q": "17 : 0,5 =",
+            "a": "34"
+          },
+          "4": {
+            "q": "15 : 0,12 =",
+            "a": "125"
+          },
+          "6": {
+            "q": "9 : 0,04 =",
+            "a": "225"
+          }
+        }
+      }
+    ]
   }
 };

@@ -15,6 +15,9 @@ const HTML_ROUTES = {
   "/riskuj-menu.html": "riskuj-menu.html",
   "/matematicke-riskuj.html": "matematicke-riskuj.html",
   "/matematicke-riskuj-zlomky.html": "matematicke-riskuj-zlomky.html",
+  "/matematicke-riskuj-zlomky2.html": "matematicke-riskuj-zlomky2.html",
+  "/matematicke-riskuj-zaporna.html": "matematicke-riskuj-zaporna.html",
+  "/matematicke-riskuj-procenta.html": "matematicke-riskuj-procenta.html",
   "/riskuj-hra.html": "riskuj-hra.html",
   "/riskuj-editor.html": "riskuj-editor.html",
 };

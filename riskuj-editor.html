@@ -120,12 +120,6 @@
       margin-bottom: 0.85rem;
     }
     textarea { min-height: 4.5rem; resize: vertical; }
-    .row2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.75rem;
-    }
-    @media (max-width: 640px) { .row2 { grid-template-columns: 1fr; } }
     .topic-block {
       background: rgba(0, 0, 0, 0.12);
       border: 1px solid var(--border);
@@ -195,12 +189,30 @@
       background: var(--elev);
     }
     .order-id {
-      font-family: ui-monospace, "Cascadia Code", "Segoe UI Mono", Menlo, monospace;
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+      min-width: 0;
       font-size: 0.92rem;
       color: var(--text);
+    }
+    .order-id-slug {
+      font-family: ui-monospace, "Cascadia Code", "Segoe UI Mono", Menlo, monospace;
+      flex-shrink: 0;
+    }
+    .order-grade {
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 650;
+      font-family: inherit;
+      white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      white-space: nowrap;
+      min-width: 0;
+    }
+    .order-grade.is-missing {
+      color: var(--danger);
+      font-weight: 600;
     }
     .order-actions {
       display: inline-flex;
@@ -271,6 +283,9 @@
     <button type="button" id="btnNew">Nová sada</button>
     <button type="button" class="danger" id="btnDel">Smazat sadu</button>
     <button type="button" class="primary" id="btnExport">Stáhnout riskuj-data.js</button>
+    <button type="button" id="btnExportTxt" title="Jen vybraná sada, čitelný text">
+      Stáhnout sadu jako .txt
+    </button>
     <label class="btn-file">
       <input type="file" id="fileImport" accept=".js,.json,application/json,text/javascript" />
       Importovat soubor
@@ -281,24 +296,11 @@
     <label for="fId">Identifikátor sady (slug v URL, např. zlomky)</label>
     <input type="text" id="fId" autocomplete="off" spellcheck="false" />
 
-    <div class="row2">
-      <div>
-        <label for="fTitle">Nadpis (název sady)</label>
-        <input type="text" id="fTitle" />
-      </div>
-      <div>
-        <label for="fSubtitle">Podnadpis</label>
-        <input type="text" id="fSubtitle" />
-      </div>
-    </div>
+    <label for="fTitle">Nadpis (název sady)</label>
+    <input type="text" id="fTitle" />
 
-    <div class="row2">
-      <div>
-        <label for="fGrade">Ročník</label>
-        <input type="number" id="fGrade" min="1" max="9" step="1" />
-      </div>
-      <div></div>
-    </div>
+    <label for="fGrade">Ročník</label>
+    <input type="number" id="fGrade" min="1" max="9" step="1" />
 
     <label for="fBlurb">Krátký popis na kartu v menu</label>
     <textarea id="fBlurb" rows="2"></textarea>
@@ -319,7 +321,7 @@
       <ul class="order-list" id="orderList"></ul>
     </div>
 
-    <h2 style="font-size:1rem;margin:1.25rem 0 0.5rem;color:var(--muted)">Témata a úlohy (2 / 4 / 6 bodů)</h2>
+    <h2 style="font-size:1rem;margin:1.25rem 0 0.5rem;color:var(--muted)">Témata a úlohy (2 body, 4 body, 6 bodů; bonus 4 body, 8 bodů, 12 bodů)</h2>
     <div id="topicsRoot"></div>
     <button type="button" id="btnAddTopic">+ Přidat téma</button>
   </div>
@@ -348,7 +350,6 @@
       var elTopics = document.getElementById("topicsRoot");
       var elFId = document.getElementById("fId");
       var elFTitle = document.getElementById("fTitle");
-      var elFSubtitle = document.getElementById("fSubtitle");
       var elFGrade = document.getElementById("fGrade");
       var elFBlurb = document.getElementById("fBlurb");
       var elFOrder = document.getElementById("fOrder");
@@ -485,6 +486,19 @@
         return isBonus ? { 2: 4, 4: 8, 6: 12 } : { 2: 2, 4: 4, 6: 6 };
       }
 
+      function pointsWord(n) {
+        var k = Math.floor(Math.abs(Number(n)));
+        if (!Number.isFinite(k)) return "bodů";
+        if (k === 1) return "bod";
+        if (k >= 2 && k <= 4) return "body";
+        var last = k % 10;
+        var last2 = k % 100;
+        if (last2 >= 11 && last2 <= 14) return "bodů";
+        if (last === 1) return "bod";
+        if (last >= 2 && last <= 4) return "body";
+        return "bodů";
+      }
+
       function blankTasks() {
         var t = {};
         basePts().forEach(function (p) {
@@ -510,7 +524,6 @@
       function newGameTemplate(id) {
         return {
           title: "Nová sada",
-          subtitle: "Uprav název a úlohy",
           grade: 6,
           cardBlurb: "Krátký popis.",
           topics: [
@@ -546,7 +559,25 @@
           li.className = "order-item";
           var name = document.createElement("div");
           name.className = "order-id";
-          name.textContent = id;
+          var slug = document.createElement("span");
+          slug.className = "order-id-slug";
+          slug.textContent = id;
+          var gradeEl = document.createElement("span");
+          gradeEl.className = "order-grade";
+          var g = state.games && state.games[id];
+          if (g) {
+            var gr = g.grade != null ? Number(g.grade) : NaN;
+            if (Number.isFinite(gr) && gr > 0) {
+              gradeEl.textContent = gr + ". ročník";
+            } else {
+              gradeEl.textContent = "ročník ?";
+            }
+          } else {
+            gradeEl.classList.add("is-missing");
+            gradeEl.textContent = "sada v datech chybí";
+          }
+          name.appendChild(slug);
+          name.appendChild(gradeEl);
           var actions = document.createElement("div");
           actions.className = "order-actions";
 
@@ -615,7 +646,6 @@
         var g = state.games[id];
         if (!g) return;
         g.title = elFTitle.value.trim();
-        g.subtitle = elFSubtitle.value.trim();
         var gv = Number(String(elFGrade.value || "").trim());
         g.grade = Number.isFinite(gv) && gv > 0 ? Math.round(gv) : 6;
         g.cardBlurb = elFBlurb.value.trim();
@@ -689,7 +719,9 @@
             tb.innerHTML =
               '<div class="pts-label">' +
               pts +
-              " body</div>" +
+              " " +
+              pointsWord(pts) +
+              "</div>" +
               '<label>Zadání<textarea class="task-q" data-pts="' +
               slotPts +
               '" rows="3" placeholder="Zadání (násobení ·, dělení :, zlomky 3/4, složené 1/(2/3), (2/3)/4)"></textarea></label>' +
@@ -711,7 +743,6 @@
         var g = state.games[id];
         elFId.value = id;
         elFTitle.value = g.title || "";
-        elFSubtitle.value = g.subtitle || "";
         elFGrade.value = String(g.grade == null ? 6 : g.grade);
         elFBlurb.value = g.cardBlurb || "";
         applyOrderFromState();
@@ -803,7 +834,6 @@
           else {
             elFId.value = "";
             elFTitle.value = "";
-            elFSubtitle.value = "";
             elFBlurb.value = "";
             elFOrder.value = "";
             elTopics.innerHTML = "";
@@ -894,6 +924,62 @@
           ";\n";
         return header + body;
       }
+
+      function taskAt(topic, slotPts) {
+        if (!topic || !topic.tasks) return { q: "", a: "" };
+        var t = topic.tasks[slotPts];
+        if (!t) t = topic.tasks[String(slotPts)];
+        return t && typeof t === "object" ? t : { q: "", a: "" };
+      }
+
+      function buildGameTextExport(g) {
+        var out = [];
+        var title = String((g && g.title) || "").trim();
+        out.push(title || "(bez názvu sady)");
+        out.push("");
+        (g && g.topics ? g.topics : []).forEach(function (topic) {
+          var label = String((topic && topic.label) || "").trim();
+          out.push(label || "(bez názvu tématu)");
+          out.push("");
+          var map = displayPts(!!(topic && topic.bonus));
+          basePts().forEach(function (slotPts) {
+            var pts = map[slotPts];
+            var t = taskAt(topic, slotPts);
+            var q = String(t.q || "").trim();
+            var a = String(t.a || "").trim();
+            if (!q && !a) return;
+            out.push(pts + " " + pointsWord(pts));
+            out.push("Otázka: " + (q || "—"));
+            out.push("Řešení: " + (a || "—"));
+            out.push("");
+          });
+          out.push("");
+        });
+        return out.join("\n") + "\n";
+      }
+
+      function safeTxtFilename(id) {
+        var s = String(id || "sada").replace(/[^\w\u00C0-\u024F.-]+/gi, "_");
+        if (!s) s = "sada";
+        return s.length > 80 ? s.slice(0, 80) : s;
+      }
+
+      document.getElementById("btnExportTxt").addEventListener("click", function () {
+        if (!currentId || !state.games[currentId]) {
+          alert("Vyber sadu v rozbalovacím seznamu.");
+          return;
+        }
+        readFormIntoGame(currentId);
+        var g = state.games[currentId];
+        var text = buildGameTextExport(g);
+        var blob = new Blob(["\uFEFF" + text], { type: "text/plain;charset=utf-8" });
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = safeTxtFilename(currentId) + ".txt";
+        a.click();
+        URL.revokeObjectURL(a.href);
+        showOk("Textová sada stažena (" + a.download + ").");
+      });
 
       document.getElementById("btnExport").addEventListener("click", function () {
         if (currentId) readFormIntoGame(currentId);
